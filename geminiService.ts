@@ -82,20 +82,15 @@ Colors: ${metadata.primaryColor} (primary), ${secondaryColorsStr} (accents)
 </composition>
 
 <background>
-CRITICAL - Two-layer background effect:
+CRITICAL - Soft, uniform atmospheric background:
 
-1. VERTICAL GRADIENT (base layer):
-   - TOP: Rich, saturated ${metadata.primaryColor} tones
-   - BOTTOM: Gradually fades to light cream or off-white
-   - Smooth, gradual transition - not abrupt
+- Fill the ENTIRE background with a soft, muted ${metadata.primaryColor} wash
+- The color should be consistent throughout, NOT a gradient
+- Think: looking through a soft ${metadata.primaryColor} haze or mist
+- A subtle lighter glow in the center is acceptable, but it MUST remain ${metadata.primaryColor} tinted
+- The overall feel should be soft, dreamy, and atmospheric
 
-2. RADIAL HALO (around product):
-   - A soft, lighter glow emanates from behind the product
-   - Creates a subtle spotlight/halo effect on the central subject
-   - Adds depth and draws focus to the product
-
-The lighter bottom provides contrast for the large text.
-DO NOT use a solid flat color - both the vertical gradient AND the radial halo are essential.
+DO NOT use gradients, cream, off-white, or neutral tones. Keep the background as a uniform ${metadata.primaryColor} atmosphere.
 </background>
 
 <badge>
