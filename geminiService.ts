@@ -82,15 +82,19 @@ Colors: ${metadata.primaryColor} (primary), ${secondaryColorsStr} (accents)
 </composition>
 
 <background>
-CRITICAL - Soft, uniform atmospheric background:
+CRITICAL - Soft gradient background with radial center glow:
 
-- Fill the ENTIRE background with a soft, muted ${metadata.primaryColor} wash
-- The color should be consistent throughout, NOT a gradient
-- Think: looking through a soft ${metadata.primaryColor} haze or mist
-- A subtle lighter glow in the center is acceptable, but it MUST remain ${metadata.primaryColor} tinted
-- The overall feel should be soft, dreamy, and atmospheric
+TWO-LAYER EFFECT:
+1. **Vertical Gradient**: Rich, saturated ${metadata.primaryColor} at the TOP, smoothly transitioning to light cream or off-white at the BOTTOM
+2. **Radial Center Glow**: A soft, luminous halo emanating from the center where the product sits - creating a spotlight effect
 
-DO NOT use gradients, cream, off-white, or neutral tones. Keep the background as a uniform ${metadata.primaryColor} atmosphere.
+KEY REQUIREMENTS:
+- Top of image: Bold, vibrant ${metadata.primaryColor}
+- Bottom of image: Fades to soft cream/off-white
+- Center: Soft radial glow that highlights the product
+- The gradient should feel smooth and natural, like professional product photography
+
+Think: High-end dispensary advertisement with studio lighting on a colored backdrop.
 </background>
 
 <badge>
