@@ -72,22 +72,20 @@ Colors: ${metadata.primaryColor} (primary), ${secondaryColorsStr} (accents)
 1. **Central Focus**: Feature the packaging and device angled prominently in the center. Package should be flat. Use crisp, commercial lighting.
 
 2. **High-Legibility Typography**: Create massive, 3D stylized "Bubble-Script" text for "${metadata.strainName}" at the bottom.
-   - Interior Fill: Bright white or soft cream gradient for maximum legibility against the colored background.
-   - Outline: Thick stroke in a darker shade of ${metadata.primaryColor} or complementary accent color.
-   - Effects: High-gloss "wet" shine and subtle 3D depth/shadow to lift the text off the background.
+   - CRITICAL - Interior Fill: Pure WHITE or very light cream. The text interior MUST be light-colored for contrast.
+   - Outline: Thick, bold stroke in a darker shade of ${metadata.primaryColor}
+   - Effects: High-gloss "wet" shine and subtle 3D depth/shadow
+   - DO NOT use dark or medium-toned fills - the text must pop against the colored background
 
 3. **Atmospheric Environment**: Surround the product with stylized slices of ${metadata.fruitFlavor}.
    - Add depth with watercolor splashes or related organic elements.
 </composition>
 
 <background>
-CRITICAL - Vibrant, bold color backdrop:
-- Primary fill: Full saturation ${metadata.primaryColor} at 90-100% opacity - NO muting or washing out
-- The background should POP with rich, vibrant color
-- Edge treatment: Subtle darkening vignette at corners only (not lightening)
-- Gradient style: Smooth radial gradient staying bold and saturated throughout
-- NO white, NO off-white, NO washed-out areas
-- Think: Eye-catching retail display with confident, saturated brand color
+Vibrant ${metadata.primaryColor} backdrop with studio vignette lighting:
+- Brightest point: bottom-center (behind product) using a lighter, saturated shade
+- Smooth gradient darkening toward all edges using deeper shades of ${metadata.primaryColor}
+- IMPORTANT: Keep full color saturation throughout. No white, gray, or washed-out areas.
 </background>
 
 <badge>
