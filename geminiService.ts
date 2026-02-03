@@ -82,10 +82,10 @@ Colors: ${metadata.primaryColor} (primary), ${secondaryColorsStr} (accents)
 </composition>
 
 <background>
-Vibrant ${metadata.primaryColor} backdrop with studio vignette lighting:
-- Brightest point: bottom-center (behind product) using a lighter, saturated shade
-- Smooth gradient darkening toward all edges using deeper shades of ${metadata.primaryColor}
-- IMPORTANT: Keep full color saturation throughout. No white, gray, or washed-out areas.
+Reverse vignette effect:
+- CENTER: Off-white or very light cream (95% white with hint of ${metadata.primaryColor})
+- EDGES: Gradually transition to richer ${metadata.primaryColor} tones
+- Creates a soft spotlight effect that makes the product and fruit stand out
 </background>
 
 <badge>
