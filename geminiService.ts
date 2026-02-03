@@ -1,28 +1,17 @@
 
 import { GoogleGenAI, Type } from "@google/genai";
 import { ProductMetadata, GenerationSettings } from "./types";
+import { ACTIVE_ANALYZE_PROMPT, ACTIVE_GENERATE_PROMPT } from "./prompts";
 
 export async function analyzeProductImage(base64Image: string): Promise<ProductMetadata> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-  const prompt = `Analyze this product image for commercial re-design.
-    Identify:
-    1. **Strain Name**: The name of the product/strain.
-    2. **Primary Fruit Flavor**: The main fruit associated with the product.
-    3. **Primary Color**: The hex color code (#RRGGBB format) of the vape device or dominant brand color.
-    4. **Secondary Colors**: Hex color codes for any accent colors or secondary brand colors.
-    5. **Aroma/Vibe Notes**: Identify any notes like "calming", "citrusy", "lavender", or specific vibe descriptors.
-
-    IMPORTANT: All colors MUST be returned as hex codes (e.g., #3B82F6 for blue, #F97316 for orange).
-
-    Return the data in the following JSON format.`;
 
   const response = await ai.models.generateContent({
     model: 'gemini-3-flash-preview',
     contents: {
       parts: [
         { inlineData: { data: base64Image, mimeType: 'image/png' } },
-        { text: prompt }
+        { text: ACTIVE_ANALYZE_PROMPT }
       ]
     },
     config: {
@@ -53,57 +42,7 @@ export async function generateAdImage(
   settings: GenerationSettings
 ): Promise<string> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const secondaryColorsStr = metadata.secondaryColors.join(", ");
-  
-  const finalPrompt = `
-<style>
-STYLE REFERENCE: High-end commercial product photography.
-Clean, professional, premium cannabis dispensary aesthetic.
-Soft diffused lighting. Smooth gradients. No harsh contrasts.
-</style>
-
-<subject>
-Product: ${metadata.strainName}
-Flavor: ${metadata.fruitFlavor}
-Colors: ${metadata.primaryColor} (primary), ${secondaryColorsStr} (accents)
-</subject>
-
-<composition>
-1. **Central Focus**: Feature the packaging and device in the center.
-   - CRITICAL: The package MUST be shown FLAT (2D front-facing view) - NOT at an angle, NOT 3D, NOT with perspective
-   - Think: A flat product shot like you'd see on a website product page
-   - The vape device can be angled/styled, but the PACKAGE itself must be flat and front-facing
-   - Use crisp, commercial lighting
-
-2. **High-Legibility Typography**: Create massive, 3D stylized "Bubble-Script" text for "${metadata.strainName}" at the bottom.
-   - CRITICAL - Interior Fill: Pure WHITE or very light cream. The text interior MUST be light-colored for contrast.
-   - Outline: Thick, bold stroke in a darker shade of ${metadata.primaryColor}
-   - Effects: High-gloss "wet" shine and subtle 3D depth/shadow
-   - DO NOT use dark or medium-toned fills - the text must pop against the colored background
-
-3. **Atmospheric Environment**: Surround the product with stylized slices of ${metadata.fruitFlavor}.
-   - Add depth with watercolor splashes or related organic elements.
-</composition>
-
-<background>
-CRITICAL - Soft gradient background with radial center glow:
-
-1. **Vertical Gradient**: Soft, pastel-toned ${metadata.primaryColor} at the TOP, smoothly transitioning to light cream or off-white at the BOTTOM
-2. **Radial Center Glow**: A soft, luminous halo emanating from the center where the product sits
-
-KEY REQUIREMENTS:
-- Top of image: Light, airy tint of ${metadata.primaryColor} 
-- Bottom of image: Fades to soft cream/off-white
-- Center: Soft radial glow that highlights the product with a long transition.
-- The gradient should feel smooth and natural, like professional product photography
-
-Think: High-end dispensary advertisement with studio lighting on a colored backdrop.
-</background>
-
-<badge>
-Add a red circular badge in the top-right corner that says "90%+ THC" in bold white text.
-</badge>
-`;
+  const finalPrompt = ACTIVE_GENERATE_PROMPT(metadata);
 
   const response = await ai.models.generateContent({
     model: 'gemini-3-pro-image-preview',
@@ -121,14 +60,12 @@ Add a red circular badge in the top-right corner that says "90%+ THC" in bold wh
     }
   });
 
-  let imageUrl = "";
-  for (const part of response.candidates?.[0]?.content?.parts || []) {
-    if (part.inlineData) {
-      imageUrl = `data:image/png;base64,${part.inlineData.data}`;
-      break;
-    }
+  const parts = response.candidates?.[0]?.content?.parts || [];
+  const imagePart = parts.find((part) => part.inlineData);
+
+  if (!imagePart?.inlineData) {
+    throw new Error("No image data returned from model");
   }
 
-  if (!imageUrl) throw new Error("No image data returned from model");
-  return imageUrl;
+  return `data:image/png;base64,${imagePart.inlineData.data}`;
 }
