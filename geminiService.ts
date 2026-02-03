@@ -72,21 +72,22 @@ Colors: ${metadata.primaryColor} (primary), ${secondaryColorsStr} (accents)
 1. **Central Focus**: Feature the packaging and device angled prominently in the center. Package should be flat. Use crisp, commercial lighting.
 
 2. **High-Legibility Typography**: Create massive, 3D stylized "Bubble-Script" text for "${metadata.strainName}" at the bottom.
-   - Internal Depth: Use a deep, dark-saturated gradient for the interior of the letters.
-   - High-Contrast Edges: Wrap each letter in a thick, brilliant white outer-stroke and a high-gloss "wet" shine.
+   - Interior Fill: Bright white or soft cream gradient for maximum legibility against the colored background.
+   - Outline: Thick stroke in a darker shade of ${metadata.primaryColor} or complementary accent color.
+   - Effects: High-gloss "wet" shine and subtle 3D depth/shadow to lift the text off the background.
 
 3. **Atmospheric Environment**: Surround the product with stylized slices of ${metadata.fruitFlavor}.
    - Add depth with watercolor splashes or related organic elements.
 </composition>
 
 <background>
-CRITICAL - Must be consistent across all generations:
-- Create a smooth, seamless RADIAL gradient centered behind the product
-- Center color: A soft, muted tint of ${metadata.primaryColor} at 40% opacity
-- Edge color: Off-white (#F5F5F5)
-- Gradient style: Ultra-smooth continuous transition with absolutely NO visible banding, NO hard edges, NO color stops, NO sharp transitions
-- The gradient must appear as a single, unified professional photography backdrop
-- Think: soft studio lighting backdrop, not a graphic design gradient
+CRITICAL - Vibrant, bold color backdrop:
+- Primary fill: Full saturation ${metadata.primaryColor} at 90-100% opacity - NO muting or washing out
+- The background should POP with rich, vibrant color
+- Edge treatment: Subtle darkening vignette at corners only (not lightening)
+- Gradient style: Smooth radial gradient staying bold and saturated throughout
+- NO white, NO off-white, NO washed-out areas
+- Think: Eye-catching retail display with confident, saturated brand color
 </background>
 
 <badge>
