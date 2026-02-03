@@ -512,11 +512,22 @@ const App: React.FC = () => {
               <div className="p-6 space-y-5">
                 <Input label="Strain Name" value={metadata.strainName} onChange={e => setMetadata({...metadata, strainName: e.target.value})} />
                 <Input label="Primary Fruit Flavor" value={metadata.fruitFlavor} onChange={e => setMetadata({...metadata, fruitFlavor: e.target.value})} />
-                <div className="grid grid-cols-2 gap-4">
-                  <Input label="Device/Primary Color" value={metadata.primaryColor} onChange={e => setMetadata({...metadata, primaryColor: e.target.value})} />
-                  <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-bold text-gray-500 uppercase">Preview</label>
-                    <div className="h-10 rounded-xl border-2 border-gray-100" style={{ backgroundColor: metadata.primaryColor.toLowerCase().replace(/\s/g, '') || '#eee' }} />
+                <div className="flex flex-col gap-1.5">
+                  <label className="text-xs font-black text-gray-500 uppercase tracking-widest">Device/Primary Color</label>
+                  <div className="flex gap-2">
+                    <input
+                      type="text"
+                      value={metadata.primaryColor}
+                      onChange={e => setMetadata({...metadata, primaryColor: e.target.value})}
+                      className="flex-1 px-4 py-2.5 border-2 border-gray-100 rounded-xl bg-gray-50 font-mono text-sm outline-none focus:border-indigo-500 transition-colors"
+                      placeholder="#3B82F6"
+                    />
+                    <input
+                      type="color"
+                      value={metadata.primaryColor.startsWith('#') ? metadata.primaryColor : '#cccccc'}
+                      onChange={e => setMetadata({...metadata, primaryColor: e.target.value})}
+                      className="w-12 h-11 rounded-xl border-2 border-gray-100 cursor-pointer"
+                    />
                   </div>
                 </div>
                 <Input label="Secondary Colors" value={metadata.secondaryColors.join(", ")} onChange={e => setMetadata({...metadata, secondaryColors: e.target.value.split(",").map(s => s.trim())})} />
