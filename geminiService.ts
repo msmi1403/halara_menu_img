@@ -82,10 +82,20 @@ Colors: ${metadata.primaryColor} (primary), ${secondaryColorsStr} (accents)
 </composition>
 
 <background>
-Reverse vignette effect:
-- CENTER: Off-white or very light cream (95% white with hint of ${metadata.primaryColor})
-- EDGES: Gradually transition to richer ${metadata.primaryColor} tones
-- Creates a soft spotlight effect that makes the product and fruit stand out
+CRITICAL - Two-layer background effect:
+
+1. VERTICAL GRADIENT (base layer):
+   - TOP: Rich, saturated ${metadata.primaryColor} tones
+   - BOTTOM: Gradually fades to light cream or off-white
+   - Smooth, gradual transition - not abrupt
+
+2. RADIAL HALO (around product):
+   - A soft, lighter glow emanates from behind the product
+   - Creates a subtle spotlight/halo effect on the central subject
+   - Adds depth and draws focus to the product
+
+The lighter bottom provides contrast for the large text.
+DO NOT use a solid flat color - both the vertical gradient AND the radial halo are essential.
 </background>
 
 <badge>
