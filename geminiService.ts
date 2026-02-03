@@ -88,11 +88,11 @@ Colors: ${metadata.primaryColor} (primary), ${secondaryColorsStr} (accents)
 <background>
 CRITICAL - Soft gradient background with radial center glow:
 
-1. **Vertical Gradient**: Rich, saturated ${metadata.primaryColor} at the TOP, smoothly transitioning to light cream or off-white at the BOTTOM
-2. **Radial Center Glow**: A soft, luminous halo emanating from the center where the product sits - creating a spotlight effect
+1. **Vertical Gradient**: Soft, pastel-toned ${metadata.primaryColor} at the TOP, smoothly transitioning to light cream or off-white at the BOTTOM
+2. **Radial Center Glow**: A soft, luminous halo emanating from the center where the product sits
 
 KEY REQUIREMENTS:
-- Top of image: Bold, vibrant ${metadata.primaryColor}
+- Top of image: Light, airy tint of ${metadata.primaryColor} 
 - Bottom of image: Fades to soft cream/off-white
 - Center: Soft radial glow that highlights the product with a long transition.
 - The gradient should feel smooth and natural, like professional product photography
