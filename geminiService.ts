@@ -69,7 +69,11 @@ Colors: ${metadata.primaryColor} (primary), ${secondaryColorsStr} (accents)
 </subject>
 
 <composition>
-1. **Central Focus**: Feature the packaging and device angled prominently in the center. Package should be flat. Use crisp, commercial lighting.
+1. **Central Focus**: Feature the packaging and device in the center.
+   - CRITICAL: The package MUST be shown FLAT (2D front-facing view) - NOT at an angle, NOT 3D, NOT with perspective
+   - Think: A flat product shot like you'd see on a website product page
+   - The vape device can be angled/styled, but the PACKAGE itself must be flat and front-facing
+   - Use crisp, commercial lighting
 
 2. **High-Legibility Typography**: Create massive, 3D stylized "Bubble-Script" text for "${metadata.strainName}" at the bottom.
    - CRITICAL - Interior Fill: Pure WHITE or very light cream. The text interior MUST be light-colored for contrast.
