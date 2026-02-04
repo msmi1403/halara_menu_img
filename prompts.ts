@@ -8,7 +8,7 @@ export const analyzePrompts = {
   v1: `Analyze this product image for commercial re-design.
     Identify:
     1. **Strain Name**: The name of the product/strain.
-    2. **Primary Fruit Flavor**: The main fruit associated with the product.
+    2. **Primary Flavor**: The main flavor associated with the product (e.g., mango, strawberry, pine, lavender, mint, earthy, woody).
     3. **Primary Color**: The hex color code (#RRGGBB format) of the vape device or dominant brand color.
     4. **Secondary Colors**: Hex color codes for any accent colors or secondary brand colors.
     5. **Aroma/Vibe Notes**: Identify any notes like "calming", "citrusy", "lavender", or specific vibe descriptors.
@@ -88,8 +88,8 @@ REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
 BACKGROUND: Smooth, soft vertical gradient from lighter tint of ${meta.primaryColor} at top to warm cream (#F5F0E8) at bottom.
 CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient only.
 
-FRUIT ELEMENTS: Surround the product with vibrant, clean, stylized ${meta.fruitFlavor}. The fruit should look juicy and "perfect," with a smooth, illustrative commercial finish.
-Also include watercolor splashes and supporting objects such as similar fruits or leaves.
+FLAVOR ELEMENTS: Surround the product with vibrant, clean, stylized ${meta.fruitFlavor} elements (fruits, botanicals, herbs, or nature elements as appropriate). These should look fresh and "perfect," with a smooth, illustrative commercial finish.
+Also include watercolor splashes and supporting objects such as related plants, leaves, or complementary natural elements.
 
 PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
 - CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
