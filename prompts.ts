@@ -83,14 +83,12 @@ Add a red circular badge in the top-right corner that says "90%+ THC" in bold wh
 BACKGROUND: Smooth, soft vertical gradient from lighter tint of ${meta.primaryColor} at top to warm cream (#F5F0E8) at bottom.
 CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient only.
 
-WATERCOLOR ACCENTS: Subtle, soft watercolor touches around the fruit elements only. NO aggressive splatters, NO drips, NO paint bleeding. Keep it clean and minimal.
-
-FRUIT ELEMENTS: 6-8 watercolor-illustrated ${meta.fruitFlavor} scattered around composition. Mix of whole and halved fruits, varying sizes, soft watercolor style.
+FRUIT ELEMENTS: Surround the product with vibrant, clean, stylized ${meta.fruitFlavor}. Soft watercolor splashes. Keep it clean and minimal.
 
 PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
 CRITICAL: NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
 
-THC BADGE: Top-right red (#E53935) circle with "90%+ THC" in white bold text.
+THC BADGE: Top-right red (#E53935) circle with "90%+ THC" in white bold text and off white border.
 
 HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
 - Interior fill: Pure WHITE or light cream (NOT colored gradient)
