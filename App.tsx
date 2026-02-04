@@ -80,6 +80,7 @@ const App: React.FC = () => {
   const [isExporting, setIsExporting] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const sourceFileInputRef = useRef<HTMLInputElement>(null);
 
   async function refreshHistory(): Promise<void> {
     try {
@@ -125,6 +126,10 @@ const App: React.FC = () => {
       setCurrentHistoryId(null);
       setResults([]);
       handleAnalysis(base64);
+      // Reset file input so same file can be selected again
+      if (sourceFileInputRef.current) {
+        sourceFileInputRef.current.value = '';
+      }
     };
     reader.readAsDataURL(file);
   }
@@ -287,6 +292,9 @@ const App: React.FC = () => {
     setMetadata(null);
     setResults([]);
     setCurrentHistoryId(null);
+    if (sourceFileInputRef.current) {
+      sourceFileInputRef.current.value = '';
+    }
   }
 
   if (hasApiKey === false && window.aistudio) {
@@ -476,7 +484,7 @@ const App: React.FC = () => {
             <div className="p-6">
               {!sourceImage ? (
                 <div className="border-2 border-dashed border-gray-200 rounded-2xl p-12 flex flex-col items-center justify-center text-center hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer relative group">
-                  <input type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} accept="image/*" />
+                  <input ref={sourceFileInputRef} type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} accept="image/*" />
                   <div className="bg-white shadow-md p-4 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
                     <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
