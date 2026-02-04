@@ -80,14 +80,20 @@ Add a red circular badge in the top-right corner that says "90%+ THC" in bold wh
   v2: (meta: ProductMetadata, settings?: GenerationSettings): string => {
     const basePrompt = `Create a premium cannabis vape marketing image:
 
+REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
+- PRESERVE the exact packaging design, logo placement, text, and graphics
+- PRESERVE the exact vape device appearance and form factor
+- Change ONLY the surrounding scene and styling - keep product visuals unchanged
+
 BACKGROUND: Smooth, soft vertical gradient from lighter tint of ${meta.primaryColor} at top to warm cream (#F5F0E8) at bottom.
 CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient only.
 
 FRUIT ELEMENTS: Surround the product with vibrant, clean, stylized ${meta.fruitFlavor}. The fruit should look juicy and "perfect," with a smooth, illustrative commercial finish.
- Also include watercolor splashes and supporting objects such as similar fruits or leaves.
+Also include watercolor splashes and supporting objects such as similar fruits or leaves.
 
 PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
-CRITICAL: NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
+- CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
+- NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
 
 THC BADGE: Top-right red (#E53935) circle with "90%+ TAC" in white bold text and off white border line just inside the red circle.
 
@@ -104,7 +110,9 @@ STYLE: Premium but playful, craft beverage aesthetic, Instagram-ready square for
       return basePrompt;
     }
 
-    return `${basePrompt}\nADDITIONAL INSTRUCTIONS:\n${additionalInstructions}`;
+    return `${basePrompt}
+ADDITIONAL INSTRUCTIONS:
+${additionalInstructions}`;
   },
 };
 
