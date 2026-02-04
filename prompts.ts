@@ -93,7 +93,7 @@ THC BADGE: Top-right red (#E53935) circle with "90%+ THC" in white bold text and
 
 HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
 - Interior fill: Pure WHITE or light cream (NOT colored gradient)
-- Outline: Thick stroke in warm brown or darker shade of ${meta.primaryColor}
+- Outline: Thick stroke in phthalo green or darker shade of ${meta.primaryColor}
 - 3D shadow effect toward bottom-right
 
 STYLE: Premium but playful, craft beverage aesthetic, Instagram-ready square format.
