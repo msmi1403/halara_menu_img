@@ -89,7 +89,7 @@ FRUIT ELEMENTS: Surround the product with vibrant, clean, stylized ${meta.fruitF
 PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
 CRITICAL: NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
 
-THC BADGE: Top-right red (#E53935) circle with "90%+ THC" in white bold text and off white border line just inside the red circle.
+THC BADGE: Top-right red (#E53935) circle with "90%+ TAC" in white bold text and off white border line just inside the red circle.
 
 HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
 - Interior fill: Pure WHITE or light cream (NOT colored gradient)
