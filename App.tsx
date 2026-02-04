@@ -1,5 +1,5 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { analyzeProductImage, generateAdImage } from './geminiService';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
+import { analyzeProductImage, generateAdImage, GeminiError, GeminiErrorType } from './geminiService';
 import { ProductMetadata, GenerationSettings, GeneratedImage, HistoryItem } from './types';
 import { Button } from './components/Button';
 import { Input, TextArea } from './components/Input';
@@ -17,6 +17,36 @@ import {
   StorageEstimate
 } from './dbService';
 
+// Image input validation constants
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof GeminiError) {
+    switch (error.type) {
+      case GeminiErrorType.NETWORK:
+        return 'Network connection failed. Please check your internet connection and try again.';
+      case GeminiErrorType.QUOTA_EXCEEDED:
+        return 'API quota exceeded. Please wait a few minutes and try again, or check your API usage limits.';
+      case GeminiErrorType.INVALID_API_KEY:
+        return 'Invalid API key. Please check your API key configuration.';
+      case GeminiErrorType.CONTENT_FILTERED:
+        return 'The content was filtered by safety settings. Try adjusting your input image or instructions.';
+      case GeminiErrorType.NO_IMAGE_DATA:
+        return 'The model did not return an image. Please try again with different settings.';
+      default:
+        return `An unexpected error occurred: ${error.message}`;
+    }
+  }
+
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.toLowerCase().includes('quota')) {
+    return 'Browser storage quota exceeded. Clear some history or export a backup before continuing.';
+  }
+
+  return 'An unexpected error occurred. Please try again.';
+}
+
 declare global {
   interface AIStudio {
     hasSelectedApiKey: () => Promise<boolean>;
@@ -30,6 +60,10 @@ declare global {
 async function base64ToBlob(base64: string, mime: string = 'image/png'): Promise<Blob> {
   const res = await fetch(`data:${mime};base64,${base64}`);
   return res.blob();
+}
+
+function generateId(): string {
+  return Math.random().toString(36).substr(2, 9);
 }
 
 function createThumbnail(url: string): Promise<string> {
@@ -52,7 +86,7 @@ function createThumbnail(url: string): Promise<string> {
     };
     img.src = url;
   });
-};
+}
 
 const App: React.FC = () => {
   const [sourceImage, setSourceImage] = useState<string | null>(null);
@@ -83,9 +117,42 @@ const App: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const sourceFileInputRef = useRef<HTMLInputElement>(null);
 
+  // Track object URLs for cleanup to prevent memory leaks
+  const activeUrlsRef = useRef<Set<string>>(new Set());
+
+  const trackUrl = useCallback((url: string) => {
+    activeUrlsRef.current.add(url);
+    return url;
+  }, []);
+
+  const revokeUrl = useCallback((url: string) => {
+    if (activeUrlsRef.current.has(url)) {
+      URL.revokeObjectURL(url);
+      activeUrlsRef.current.delete(url);
+    }
+  }, []);
+
+  const revokeAllUrls = useCallback(() => {
+    activeUrlsRef.current.forEach(url => URL.revokeObjectURL(url));
+    activeUrlsRef.current.clear();
+  }, []);
+
   async function refreshHistory(): Promise<void> {
     try {
+      // Revoke existing history item URLs before loading new ones
+      history.forEach(item => {
+        item.variants.forEach(v => {
+          if (v.url) revokeUrl(v.url);
+        });
+      });
+
       const savedHistory = await getAllHistory();
+      // Track new URLs created by getAllHistory
+      savedHistory.forEach(item => {
+        item.variants.forEach(v => {
+          if (v.url) trackUrl(v.url);
+        });
+      });
       setHistory(savedHistory);
     } catch (err) {
       console.error("Failed to load history", err);
@@ -112,11 +179,35 @@ const App: React.FC = () => {
       await refreshStorageInfo();
     }
     init();
+
+    // Cleanup: revoke all object URLs on unmount to prevent memory leaks
+    return () => {
+      revokeAllUrls();
+    };
   }, []);
 
   async function handleFileChange(e: React.ChangeEvent<HTMLInputElement>): Promise<void> {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Validate file type
+    if (!ALLOWED_IMAGE_TYPES.includes(file.type)) {
+      alert(`Invalid file type: ${file.type || 'unknown'}. Please upload a JPEG, PNG, WebP, or GIF image.`);
+      if (sourceFileInputRef.current) {
+        sourceFileInputRef.current.value = '';
+      }
+      return;
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      const sizeMB = (file.size / (1024 * 1024)).toFixed(1);
+      alert(`File too large (${sizeMB}MB). Maximum allowed size is 10MB.`);
+      if (sourceFileInputRef.current) {
+        sourceFileInputRef.current.value = '';
+      }
+      return;
+    }
 
     const reader = new FileReader();
     reader.onloadend = async () => {
@@ -142,7 +233,7 @@ const App: React.FC = () => {
       setMetadata(data);
     } catch (error) {
       console.error("Analysis failed", error);
-      alert("Failed to analyze image. Please try again.");
+      alert(getErrorMessage(error));
     } finally {
       setIsAnalyzing(false);
     }
@@ -158,26 +249,29 @@ const App: React.FC = () => {
 
     setIsGenerating(true);
     try {
-      const newVariants: GeneratedImage[] = [];
-      for (let i = 0; i < settings.numberOfVariants; i++) {
-        const b64WithPrefix = await generateAdImage(sourceImage, metadata, settings);
-        const b64Data = b64WithPrefix.split(',')[1];
-        const blob = await base64ToBlob(b64Data);
-        const objectUrl = URL.createObjectURL(blob);
+      const imagePromises = Array(settings.numberOfVariants)
+        .fill(null)
+        .map(() => generateAdImage(sourceImage, metadata, settings));
+      const b64Results = await Promise.all(imagePromises);
 
-        newVariants.push({
-          id: Math.random().toString(36).substr(2, 9),
-          url: objectUrl,
-          blob,
-          timestamp: Date.now()
-        });
-      }
+      const newVariants = await Promise.all(
+        b64Results.map(async (b64WithPrefix) => {
+          const b64Data = b64WithPrefix.split(',')[1];
+          const blob = await base64ToBlob(b64Data);
+          return {
+            id: generateId(),
+            url: trackUrl(URL.createObjectURL(blob)),
+            blob,
+            timestamp: Date.now()
+          };
+        })
+      );
 
       const updatedResults = [...newVariants, ...results].slice(0, 10);
       setResults(updatedResults);
 
       setIsSaving(true);
-      const historyId = currentHistoryId || Math.random().toString(36).substr(2, 9);
+      const historyId = currentHistoryId || generateId();
       const thumbnail = await createThumbnail(updatedResults[0].url);
 
       const historyItem: HistoryItem = {
@@ -194,9 +288,9 @@ const App: React.FC = () => {
       setCurrentHistoryId(historyId);
       await refreshHistory();
       await refreshStorageInfo();
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Generation/Save failed", error);
-      alert("Failed to generate or save asset. Ensure your browser storage isn't full.");
+      alert(getErrorMessage(error));
     } finally {
       setIsGenerating(false);
       setIsSaving(false);
@@ -204,6 +298,9 @@ const App: React.FC = () => {
   }
 
   function handleRestore(item: HistoryItem): void {
+    // Revoke URLs from previous results before restoring new ones
+    results.forEach(r => revokeUrl(r.url));
+
     if (item.sourceImage instanceof Blob) {
       setSourceBlob(item.sourceImage);
       const reader = new FileReader();
@@ -215,6 +312,7 @@ const App: React.FC = () => {
 
     setMetadata(item.metadata);
     setSettings(item.settings);
+    // Track URLs from restored variants (already tracked via history)
     setResults(item.variants);
     setCurrentHistoryId(item.id);
     setIsHistoryOpen(false);
@@ -291,6 +389,8 @@ const App: React.FC = () => {
   }
 
   function reset(): void {
+    // Revoke URLs from current results to prevent memory leaks
+    results.forEach(r => revokeUrl(r.url));
     setSourceImage(null);
     setSourceBlob(null);
     setMetadata(null);
@@ -684,7 +784,10 @@ const App: React.FC = () => {
                     <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest block mb-0.5">Variant {img.id.slice(0, 4)}</span>
                     <h4 className="text-base font-black text-gray-800 tracking-tight">{metadata?.strainName}</h4>
                   </div>
-                  <button onClick={() => setResults(prev => prev.filter(r => r.id !== img.id))} className="p-2 text-gray-300 hover:text-red-500 transition-colors">
+                  <button onClick={() => {
+                    revokeUrl(img.url);
+                    setResults(prev => prev.filter(r => r.id !== img.id));
+                  }} className="p-2 text-gray-300 hover:text-red-500 transition-colors">
                     <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                     </svg>
