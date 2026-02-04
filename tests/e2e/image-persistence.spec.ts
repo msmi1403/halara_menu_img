@@ -6,7 +6,7 @@ test.describe('Image Persistence', () => {
   });
 
   test('should load the app successfully', async ({ page }) => {
-    await expect(page.locator('h1')).toContainText('Shopify AdMaster');
+    await expect(page.locator('h1')).toContainText('Halara Menu Imagineer');
   });
 
   test('should show storage indicator button', async ({ page }) => {

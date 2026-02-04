@@ -65,7 +65,8 @@ const App: React.FC = () => {
   const [settings, setSettings] = useState<GenerationSettings>({
     aspectRatio: '1:1', // Default to 1080x1080 square
     imageSize: '1K',
-    numberOfVariants: 1
+    numberOfVariants: 1,
+    additionalInstructions: ''
   });
   
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
@@ -243,7 +244,7 @@ const App: React.FC = () => {
       const url = URL.createObjectURL(blob);
       const link = document.createElement('a');
       link.href = url;
-      link.download = `shopify-admaster-backup-${new Date().toISOString().split('T')[0]}.json`;
+      link.download = `halara-menu-imagineer-backup-${new Date().toISOString().split('T')[0]}.json`;
       link.click();
       URL.revokeObjectURL(url);
       setShowStorageMenu(false);
@@ -280,10 +281,13 @@ const App: React.FC = () => {
 
   function formatBytes(bytes: number): string {
     if (bytes === 0) return '0 B';
+
     const k = 1024;
     const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i];
+    const exponent = Math.floor(Math.log(bytes) / Math.log(k));
+    const formatted = parseFloat((bytes / Math.pow(k, exponent)).toFixed(1));
+
+    return `${formatted} ${sizes[exponent]}`;
   }
 
   function reset(): void {
@@ -307,7 +311,7 @@ const App: React.FC = () => {
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
               </svg>
           </div>
-          <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Shopify AdMaster</h1>
+          <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Halara Menu Imagineer</h1>
           <p className="text-gray-500 mb-8 font-medium leading-relaxed">To generate high-end commercial assets, select an API key from a paid project.</p>
           <Button className="w-full py-4 text-lg" onClick={async () => {
             await aistudio.openSelectKey();
@@ -348,8 +352,8 @@ const App: React.FC = () => {
               </svg>
             </div>
             <div>
-              <h1 className="text-lg font-bold text-gray-900 leading-tight">Shopify AdMaster</h1>
-              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">Papas Style v3.1</p>
+              <h1 className="text-lg font-bold text-gray-900 leading-tight">Halara Menu Imagineer</h1>
+              <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest">AI Image Generator</p>
             </div>
           </div>
 
@@ -518,28 +522,47 @@ const App: React.FC = () => {
                 <h2 className="text-xs font-black text-gray-900 uppercase tracking-widest">2. Identified Details</h2>
               </div>
               <div className="p-6 space-y-5">
-                <Input label="Strain Name" value={metadata.strainName} onChange={e => setMetadata({...metadata, strainName: e.target.value})} />
-                <Input label="Primary Fruit Flavor" value={metadata.fruitFlavor} onChange={e => setMetadata({...metadata, fruitFlavor: e.target.value})} />
+                <Input
+                  label="Strain Name"
+                  value={metadata.strainName}
+                  onChange={e => setMetadata({ ...metadata, strainName: e.target.value })}
+                />
+                <Input
+                  label="Primary Fruit Flavor"
+                  value={metadata.fruitFlavor}
+                  onChange={e => setMetadata({ ...metadata, fruitFlavor: e.target.value })}
+                />
                 <div className="flex flex-col gap-1.5">
                   <label className="text-xs font-black text-gray-500 uppercase tracking-widest">Device/Primary Color</label>
                   <div className="flex gap-2">
                     <input
                       type="text"
                       value={metadata.primaryColor}
-                      onChange={e => setMetadata({...metadata, primaryColor: e.target.value})}
+                      onChange={e => setMetadata({ ...metadata, primaryColor: e.target.value })}
                       className="flex-1 px-4 py-2.5 border-2 border-gray-100 rounded-xl bg-gray-50 font-mono text-sm outline-none focus:border-indigo-500 transition-colors"
                       placeholder="#3B82F6"
                     />
                     <input
                       type="color"
                       value={metadata.primaryColor.startsWith('#') ? metadata.primaryColor : '#cccccc'}
-                      onChange={e => setMetadata({...metadata, primaryColor: e.target.value})}
+                      onChange={e => setMetadata({ ...metadata, primaryColor: e.target.value })}
                       className="w-12 h-11 rounded-xl border-2 border-gray-100 cursor-pointer"
                     />
                   </div>
                 </div>
-                <Input label="Secondary Colors" value={metadata.secondaryColors.join(", ")} onChange={e => setMetadata({...metadata, secondaryColors: e.target.value.split(",").map(s => s.trim())})} />
-                <TextArea label="Vibe Notes / Aroma" value={metadata.notes} onChange={e => setMetadata({...metadata, notes: e.target.value})} />
+                <Input
+                  label="Secondary Colors"
+                  value={metadata.secondaryColors.join(", ")}
+                  onChange={e => setMetadata({
+                    ...metadata,
+                    secondaryColors: e.target.value.split(",").map(s => s.trim())
+                  })}
+                />
+                <TextArea
+                  label="Vibe Notes / Aroma"
+                  value={metadata.notes}
+                  onChange={e => setMetadata({ ...metadata, notes: e.target.value })}
+                />
               </div>
             </section>
           )}
@@ -552,7 +575,11 @@ const App: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-xs font-black text-gray-500 uppercase tracking-widest">Ratio</label>
-                  <select className="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl bg-gray-50 font-bold text-sm outline-none focus:border-indigo-500 transition-colors" value={settings.aspectRatio} onChange={e => setSettings({...settings, aspectRatio: e.target.value as any})}>
+                  <select
+                    className="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl bg-gray-50 font-bold text-sm outline-none focus:border-indigo-500 transition-colors"
+                    value={settings.aspectRatio}
+                    onChange={e => setSettings({ ...settings, aspectRatio: e.target.value as any })}
+                  >
                     <option value="1:1">1:1 (Square)</option>
                     <option value="4:3">4:3 (Landscape)</option>
                     <option value="9:16">9:16 (Story)</option>
@@ -561,7 +588,11 @@ const App: React.FC = () => {
                 </div>
                 <div className="space-y-2">
                   <label className="text-xs font-black text-gray-500 uppercase tracking-widest">Quality</label>
-                  <select className="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl bg-gray-50 font-bold text-sm outline-none focus:border-indigo-500 transition-colors" value={settings.imageSize} onChange={e => setSettings({...settings, imageSize: e.target.value as any})}>
+                  <select
+                    className="w-full px-4 py-2.5 border-2 border-gray-100 rounded-xl bg-gray-50 font-bold text-sm outline-none focus:border-indigo-500 transition-colors"
+                    value={settings.imageSize}
+                    onChange={e => setSettings({ ...settings, imageSize: e.target.value as any })}
+                  >
                     <option value="1K">1080px (1K)</option>
                     <option value="2K">1440px (2K)</option>
                     <option value="4K">2160px (4K)</option>
@@ -572,12 +603,26 @@ const App: React.FC = () => {
                 <label className="text-xs font-black text-gray-500 uppercase tracking-widest">Variations</label>
                 <div className="flex gap-2">
                   {[1, 2, 3].map(n => (
-                    <button key={n} onClick={() => setSettings({...settings, numberOfVariants: n})} className={`flex-1 py-3 rounded-xl border-2 font-black text-xs uppercase tracking-widest transition-all ${settings.numberOfVariants === n ? 'bg-indigo-600 text-white border-indigo-600 shadow-md' : 'bg-white text-gray-400 border-gray-100 hover:border-indigo-200'}`}>
+                    <button
+                      key={n}
+                      onClick={() => setSettings({ ...settings, numberOfVariants: n })}
+                      className={`flex-1 py-3 rounded-xl border-2 font-black text-xs uppercase tracking-widest transition-all ${
+                        settings.numberOfVariants === n
+                          ? 'bg-indigo-600 text-white border-indigo-600 shadow-md'
+                          : 'bg-white text-gray-400 border-gray-100 hover:border-indigo-200'
+                      }`}
+                    >
                       {n} Image{n > 1 ? 's' : ''}
                     </button>
                   ))}
                 </div>
               </div>
+              <TextArea
+                label="Additional Instructions"
+                value={settings.additionalInstructions}
+                onChange={e => setSettings({ ...settings, additionalInstructions: e.target.value })}
+                placeholder="Add custom instructions for the image generation (e.g., 'Make the background more vibrant' or 'Add sparkle effects')"
+              />
             </div>
           </section>
 
@@ -656,7 +701,7 @@ const App: React.FC = () => {
                   </svg>
                 </div>
                 <h3 className="text-xl font-bold text-gray-800">No Assets Generated</h3>
-                <p className="text-gray-400 mt-2 max-w-xs text-sm">Upload a product photo and click "Render Assets" to create high-end "Papas Herb" style content.</p>
+                <p className="text-gray-400 mt-2 max-w-xs text-sm">Upload a product photo and click "Render Assets" to create professional marketing images.</p>
               </div>
             )}
           </div>

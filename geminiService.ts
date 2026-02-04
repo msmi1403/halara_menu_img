@@ -42,7 +42,7 @@ export async function generateAdImage(
   settings: GenerationSettings
 ): Promise<string> {
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-  const finalPrompt = ACTIVE_GENERATE_PROMPT(metadata);
+  const finalPrompt = ACTIVE_GENERATE_PROMPT(metadata, settings);
 
   const response = await ai.models.generateContent({
     model: 'gemini-3-pro-image-preview',
