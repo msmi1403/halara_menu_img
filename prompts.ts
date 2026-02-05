@@ -126,7 +126,7 @@ REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
 BACKGROUND: Smooth, soft vertical gradient from lighter tint of ${meta.primaryColor} at top to warm cream (#F5F0E8) at bottom.
 CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient only.
 
-BACKGROUND ELEMENTS: Surround the product with bright, vibrant watercolor splashes based on ${meta.primaryColor} and its complementary colors. These should be abstract, artistic paint splashes that create visual interest and energy. Use the dominant color prominently along with bold, saturated complementary accents.
+BACKGROUND ELEMENTS: Create an explosive burst of bright, vibrant watercolor splashes emerging from behind the product. Use ${meta.primaryColor} prominently along with bold, saturated complementary colors. The paint splashes should radiate outward from behind the products, creating dynamic depth and visual energy.
 
 PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
 - CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
