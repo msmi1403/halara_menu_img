@@ -100,7 +100,8 @@ const App: React.FC = () => {
     aspectRatio: '1:1', // Default to 1080x1080 square
     imageSize: '1K',
     numberOfVariants: 1,
-    additionalInstructions: ''
+    additionalInstructions: '',
+    nyMode: false
   });
   
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
@@ -716,6 +717,22 @@ const App: React.FC = () => {
                     </button>
                   ))}
                 </div>
+              </div>
+              <div className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl border-2 border-gray-100">
+                <div>
+                  <label className="text-xs font-black text-gray-500 uppercase tracking-widest">NY</label>
+                  <p className="text-xs text-gray-400 mt-0.5">Remove flavor imagery</p>
+                </div>
+                <button
+                  onClick={() => setSettings({ ...settings, nyMode: !settings.nyMode })}
+                  className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                    settings.nyMode ? 'bg-indigo-600' : 'bg-gray-200'
+                  }`}
+                >
+                  <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    settings.nyMode ? 'translate-x-6' : 'translate-x-1'
+                  }`} />
+                </button>
               </div>
               <TextArea
                 label="Additional Instructions"

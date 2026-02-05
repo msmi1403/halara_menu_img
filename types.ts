@@ -12,6 +12,7 @@ export interface GenerationSettings {
   imageSize: "1K" | "2K" | "4K";
   numberOfVariants: number;
   additionalInstructions: string;
+  nyMode: boolean;
 }
 
 export interface GeneratedImage {

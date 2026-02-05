@@ -114,6 +114,43 @@ STYLE: Premium but playful, craft beverage aesthetic, Instagram-ready square for
 ADDITIONAL INSTRUCTIONS:
 ${additionalInstructions}`;
   },
+
+  v3: (meta: ProductMetadata, settings?: GenerationSettings): string => {
+    const basePrompt = `Create a premium cannabis vape marketing image:
+
+REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
+- PRESERVE the exact packaging design, logo placement, text, and graphics
+- PRESERVE the exact vape device appearance and form factor
+- Change ONLY the surrounding scene and styling - keep product visuals unchanged
+
+BACKGROUND: Smooth, soft vertical gradient from lighter tint of ${meta.primaryColor} at top to warm cream (#F5F0E8) at bottom.
+CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient only.
+
+BACKGROUND ELEMENTS: Surround the product with bright, vibrant watercolor splashes in complementary colors. These should be abstract, artistic paint splashes that create visual interest and energy. Use bold, saturated colors that complement ${meta.primaryColor}.
+
+PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
+- CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
+- NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
+
+THC BADGE: Top-right corner. Solid red (#E53935) filled circle. Inside the circle, an off-white/cream inset ring stroke (NOT on the outer edge - positioned inward from the perimeter). Center text in off-white/cream bold: "90%+" on first line, "TAC" on second line.
+
+HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
+- Interior fill: Pure WHITE or light cream (NOT colored gradient)
+- Outline: Thick stroke in phthalo green or darker shade of ${meta.primaryColor}
+- 3D shadow effect toward bottom-right
+
+STYLE: Premium but playful, craft beverage aesthetic, Instagram-ready square format.
+`;
+
+    const additionalInstructions = settings?.additionalInstructions?.trim();
+    if (!additionalInstructions) {
+      return basePrompt;
+    }
+
+    return `${basePrompt}
+ADDITIONAL INSTRUCTIONS:
+${additionalInstructions}`;
+  },
 };
 
 // ============================================
@@ -122,4 +159,4 @@ ${additionalInstructions}`;
 
 export const ACTIVE_ANALYZE_PROMPT = analyzePrompts.v1;
 export const ACTIVE_GENERATE_PROMPT = (meta: ProductMetadata, settings?: GenerationSettings) =>
-  generatePrompts.v2(meta, settings);
+  settings?.nyMode ? generatePrompts.v3(meta, settings) : generatePrompts.v2(meta, settings);
