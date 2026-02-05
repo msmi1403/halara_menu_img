@@ -13,6 +13,7 @@ export interface GenerationSettings {
   numberOfVariants: number;
   additionalInstructions: string;
   nyMode: boolean;
+  resinRosinMode: boolean;
 }
 
 export interface GeneratedImage {

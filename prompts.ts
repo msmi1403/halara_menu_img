@@ -22,6 +22,67 @@ export const analyzePrompts = {
 // GENERATE PROMPTS
 // ============================================
 
+// Element section generators for different prompt variants
+const elementSections = {
+  // Standard flavor imagery (default - v2)
+  standard: (meta: ProductMetadata) =>
+    `FLAVOR ELEMENTS: Surround the product with vibrant, clean, stylized ${meta.fruitFlavor} elements (fruits, botanicals, herbs, or nature elements as appropriate). These should look fresh and "perfect," with a smooth, illustrative commercial finish.
+Also include watercolor splashes and supporting objects such as related plants, leaves, or complementary natural elements.`,
+
+  // Watercolor only - NY mode (no flavor imagery - v3)
+  watercolor: (meta: ProductMetadata) =>
+    `BACKGROUND ELEMENTS: Create an explosive burst of bright, vibrant watercolor splashes emerging from behind the product. Use ${meta.primaryColor} prominently along with bold, saturated complementary colors. The paint splashes should radiate outward from behind the products, creating dynamic depth and visual energy.`,
+};
+
+// Optional addon blurbs that can be appended to element sections
+const elementAddons = {
+  // Weed leaves addon for Resin/Rosin mode (v4)
+  weedLeaves: `
+Include stylized cannabis/marijuana leaves throughout the composition. The weed leaves should complement the flavor imagery, creating a cohesive cannabis concentrate aesthetic.`,
+};
+
+// Unified base generator for v2/v3/v4 prompts
+const generateBase = (
+  meta: ProductMetadata,
+  elementSection: string,
+  settings?: GenerationSettings,
+  addon?: string
+): string => {
+  const fullElementSection = addon ? elementSection + addon : elementSection;
+  const basePrompt = `Create a premium cannabis vape marketing image:
+
+REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
+- PRESERVE the exact packaging design, logo placement, text, and graphics
+- PRESERVE the exact vape device appearance and form factor
+- Change ONLY the surrounding scene and styling - keep product visuals unchanged
+
+BACKGROUND: Smooth, soft vertical gradient from lighter tint of ${meta.primaryColor} at top to warm cream (#F5F0E8) at bottom.
+CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient only.
+
+${fullElementSection}
+
+PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
+- CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
+- NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
+
+THC BADGE: Top-right corner. Solid red (#E53935) filled circle. Inside the circle, an off-white/cream inset ring stroke (NOT on the outer edge - positioned inward from the perimeter). Center text in off-white/cream bold: "90%+" on first line, "TAC" on second line.
+
+HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
+- Interior fill: Pure WHITE or light cream (NOT colored gradient)
+- Outline: Thick stroke in phthalo green or darker shade of ${meta.primaryColor}
+- 3D shadow effect toward bottom-right
+
+STYLE: Premium but playful, craft beverage aesthetic, Instagram-ready square format.
+`;
+
+  const additionalInstructions = settings?.additionalInstructions?.trim();
+  return additionalInstructions
+    ? `${basePrompt}
+ADDITIONAL INSTRUCTIONS:
+${additionalInstructions}`
+    : basePrompt;
+};
+
 export const generatePrompts = {
   v1: (meta: ProductMetadata): string => {
     const secondaryColorsStr = meta.secondaryColors.join(", ");
@@ -77,80 +138,14 @@ Add a red circular badge in the top-right corner that says "90%+ THC" in bold wh
 `;
   },
 
-  v2: (meta: ProductMetadata, settings?: GenerationSettings): string => {
-    const basePrompt = `Create a premium cannabis vape marketing image:
+  v2: (meta: ProductMetadata, settings?: GenerationSettings) =>
+    generateBase(meta, elementSections.standard(meta), settings),
 
-REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
-- PRESERVE the exact packaging design, logo placement, text, and graphics
-- PRESERVE the exact vape device appearance and form factor
-- Change ONLY the surrounding scene and styling - keep product visuals unchanged
+  v3: (meta: ProductMetadata, settings?: GenerationSettings) =>
+    generateBase(meta, elementSections.watercolor(meta), settings),
 
-BACKGROUND: Smooth, soft vertical gradient from lighter tint of ${meta.primaryColor} at top to warm cream (#F5F0E8) at bottom.
-CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient only.
-
-FLAVOR ELEMENTS: Surround the product with vibrant, clean, stylized ${meta.fruitFlavor} elements (fruits, botanicals, herbs, or nature elements as appropriate). These should look fresh and "perfect," with a smooth, illustrative commercial finish.
-Also include watercolor splashes and supporting objects such as related plants, leaves, or complementary natural elements.
-
-PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
-- CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
-- NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
-
-THC BADGE: Top-right corner. Solid red (#E53935) filled circle. Inside the circle, an off-white/cream inset ring stroke (NOT on the outer edge - positioned inward from the perimeter). Center text in off-white/cream bold: "90%+" on first line, "TAC" on second line.
-
-HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
-- Interior fill: Pure WHITE or light cream (NOT colored gradient)
-- Outline: Thick stroke in phthalo green or darker shade of ${meta.primaryColor}
-- 3D shadow effect toward bottom-right
-
-STYLE: Premium but playful, craft beverage aesthetic, Instagram-ready square format.
-`;
-
-    const additionalInstructions = settings?.additionalInstructions?.trim();
-    if (!additionalInstructions) {
-      return basePrompt;
-    }
-
-    return `${basePrompt}
-ADDITIONAL INSTRUCTIONS:
-${additionalInstructions}`;
-  },
-
-  v3: (meta: ProductMetadata, settings?: GenerationSettings): string => {
-    const basePrompt = `Create a premium cannabis vape marketing image:
-
-REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
-- PRESERVE the exact packaging design, logo placement, text, and graphics
-- PRESERVE the exact vape device appearance and form factor
-- Change ONLY the surrounding scene and styling - keep product visuals unchanged
-
-BACKGROUND: Smooth, soft vertical gradient from lighter tint of ${meta.primaryColor} at top to warm cream (#F5F0E8) at bottom.
-CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient only.
-
-BACKGROUND ELEMENTS: Create an explosive burst of bright, vibrant watercolor splashes emerging from behind the product. Use ${meta.primaryColor} prominently along with bold, saturated complementary colors. The paint splashes should radiate outward from behind the products, creating dynamic depth and visual energy.
-
-PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
-- CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
-- NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
-
-THC BADGE: Top-right corner. Solid red (#E53935) filled circle. Inside the circle, an off-white/cream inset ring stroke (NOT on the outer edge - positioned inward from the perimeter). Center text in off-white/cream bold: "90%+" on first line, "TAC" on second line.
-
-HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
-- Interior fill: Pure WHITE or light cream (NOT colored gradient)
-- Outline: Thick stroke in phthalo green or darker shade of ${meta.primaryColor}
-- 3D shadow effect toward bottom-right
-
-STYLE: Premium but playful, craft beverage aesthetic, Instagram-ready square format.
-`;
-
-    const additionalInstructions = settings?.additionalInstructions?.trim();
-    if (!additionalInstructions) {
-      return basePrompt;
-    }
-
-    return `${basePrompt}
-ADDITIONAL INSTRUCTIONS:
-${additionalInstructions}`;
-  },
+  v4: (meta: ProductMetadata, settings?: GenerationSettings) =>
+    generateBase(meta, elementSections.standard(meta), settings, elementAddons.weedLeaves),
 };
 
 // ============================================
@@ -158,5 +153,8 @@ ${additionalInstructions}`;
 // ============================================
 
 export const ACTIVE_ANALYZE_PROMPT = analyzePrompts.v1;
-export const ACTIVE_GENERATE_PROMPT = (meta: ProductMetadata, settings?: GenerationSettings) =>
-  settings?.nyMode ? generatePrompts.v3(meta, settings) : generatePrompts.v2(meta, settings);
+export function ACTIVE_GENERATE_PROMPT(meta: ProductMetadata, settings?: GenerationSettings): string {
+  if (settings?.nyMode) return generatePrompts.v3(meta, settings);
+  if (settings?.resinRosinMode) return generatePrompts.v4(meta, settings);
+  return generatePrompts.v2(meta, settings);
+}
