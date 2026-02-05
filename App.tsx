@@ -37,8 +37,12 @@ function isResinProduct(strainName: string): boolean {
 }
 
 // CBD detection for auto-enabling mode
+// Detects "cbd" keyword OR ratio patterns like "1:1", "2:1", etc.
 function isCbdProduct(strainName: string): boolean {
-  return strainName.toLowerCase().includes('cbd');
+  const lower = strainName.toLowerCase();
+  if (lower.includes('cbd')) return true;
+  // Check for ratio patterns (e.g., "1:1", "2:1", "3:1")
+  return /\b\d+:\d+\b/.test(strainName);
 }
 
 // Battery keyword detection for auto-enabling mode
