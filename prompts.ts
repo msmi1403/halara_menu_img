@@ -40,7 +40,7 @@ Also include watercolor splashes and supporting objects such as related plants, 
 
 WATERCOLOR SPLASHES: Add dynamic watercolor paint splashes using ${meta.primaryColor} and accent colors (${accentColors}). The splashes should create visual energy around the products.
 
-CONCENTRATE DRIPS: Include golden/amber honey-like oil drips flowing down from the products or pooling beneath them, evoking premium cannabis concentrate.
+CONCENTRATE DRIPS: Include golden/amber honey-like oil drips flowing down from the background objects or pooling beneath them, evoking premium cannabis concentrate.
 
 CANNABIS LEAVES: Feature prominent, stylized cannabis/marijuana leaves throughout the composition - make them a key visual element, not just subtle accents. The leaves should be bold and clearly visible.`;
   },
