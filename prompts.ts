@@ -49,6 +49,7 @@ const generateBase = (
   addon?: string
 ): string => {
   const fullElementSection = addon ? elementSection + addon : elementSection;
+  const badgePercent = settings?.resinRosinMode ? "80%+" : "90%+";
   const basePrompt = `Create a premium cannabis vape marketing image:
 
 REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
@@ -65,7 +66,7 @@ PRODUCTS: Center composition with packaging box on left (tilted slightly to the 
 - CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
 - NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
 
-THC BADGE: Top-right corner. Solid red (#E53935) filled circle. Inside the circle, an off-white/cream inset ring stroke (NOT on the outer edge - positioned inward from the perimeter). Center text in off-white/cream bold: "90%+" on first line, "TAC" on second line.
+THC BADGE: Top-right corner. Solid red (#E53935) filled circle. Inside the circle, an off-white/cream inset ring stroke (NOT on the outer edge - positioned inward from the perimeter). Center text in off-white/cream bold: "${badgePercent}" on first line, "TAC" on second line.
 
 HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
 - Interior fill: Pure WHITE or light cream (NOT colored gradient)
