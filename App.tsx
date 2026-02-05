@@ -591,13 +591,13 @@ const App: React.FC = () => {
               {!sourceImage ? (
                 <div className="border-2 border-dashed border-gray-200 rounded-2xl p-12 flex flex-col items-center justify-center text-center hover:border-indigo-400 hover:bg-indigo-50/30 transition-all cursor-pointer relative group">
                   <input ref={sourceFileInputRef} type="file" className="absolute inset-0 opacity-0 cursor-pointer" onChange={handleFileChange} accept="image/*" />
-                  <div className="bg-white shadow-md p-4 rounded-2xl mb-4 group-hover:scale-110 transition-transform">
+                  <div className="bg-white shadow-md p-4 rounded-2xl mb-4 group-hover:scale-110 transition-transform pointer-events-none">
                     <svg className="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
                     </svg>
                   </div>
-                  <p className="text-sm font-bold text-gray-700">Upload Product Shot</p>
-                  <p className="text-xs text-gray-400 mt-2">1:1 recommended for best results</p>
+                  <p className="text-sm font-bold text-gray-700 pointer-events-none">Upload Product Shot</p>
+                  <p className="text-xs text-gray-400 mt-2 pointer-events-none">1:1 recommended for best results</p>
                 </div>
               ) : (
                 <div className="relative group rounded-2xl overflow-hidden border border-gray-100 bg-gray-50 shadow-inner">
