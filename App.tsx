@@ -268,22 +268,19 @@ const App: React.FC = () => {
 
   async function handleAnalysis(img: string): Promise<void> {
     setIsAnalyzing(true);
+
     try {
       const data = await analyzeProductImage(img);
       setMetadata(data);
 
-      // Auto-enable resin mode if product name or notes contains resin keywords
-      if (isResinProduct(data.strainName, data.notes)) {
-        setSettings(prev => ({ ...prev, resinRosinMode: true }));
-      }
-      // Auto-enable CBD mode if product name or notes contains CBD keywords
-      if (isCbdProduct(data.strainName, data.notes)) {
-        setSettings(prev => ({ ...prev, cbdMode: true }));
-      }
-      // Auto-enable battery mode if product name or notes contains battery keywords
-      if (isBatteryProduct(data.strainName, data.notes)) {
-        setSettings(prev => ({ ...prev, batteryMode: true }));
-      }
+      // Auto-detect product modes from strain name and notes
+      // (nyMode is user-only toggle, not auto-detected)
+      setSettings(prev => ({
+        ...prev,
+        resinRosinMode: isResinProduct(data.strainName, data.notes),
+        cbdMode: isCbdProduct(data.strainName, data.notes),
+        batteryMode: isBatteryProduct(data.strainName, data.notes)
+      }));
     } catch (error) {
       console.error("Analysis failed", error);
       alert(getErrorMessage(error));
