@@ -29,27 +29,28 @@ const GENERATION_MODES = [
   { key: 'batteryMode' as const, label: 'Battery', description: 'No background images or badge' }
 ];
 
-// Resin/Rosin keyword detection for auto-enabling mode
-const RESIN_KEYWORDS = ['resin', 'rosin', 'sauce'];
+// Product type detection for auto-enabling modes
+// All functions check combined strainName + notes since AI may put product type in notes
 
-function isResinProduct(strainName: string): boolean {
-  return RESIN_KEYWORDS.some(keyword => strainName.toLowerCase().includes(keyword));
+function combineFields(strainName: string, notes?: string): string {
+  return (strainName + ' ' + (notes || '')).toLowerCase();
 }
 
-// CBD detection for auto-enabling mode
-// Detects "cbd" keyword OR ratio patterns like "1:1", "2:1", etc.
-function isCbdProduct(strainName: string): boolean {
-  const lower = strainName.toLowerCase();
-  if (lower.includes('cbd')) return true;
-  // Check for ratio patterns (e.g., "1:1", "2:1", "3:1")
-  return /\b\d+:\d+\b/.test(strainName);
+function containsAny(text: string, keywords: string[]): boolean {
+  return keywords.some(keyword => text.includes(keyword));
 }
 
-// Battery keyword detection for auto-enabling mode
-const BATTERY_KEYWORDS = ['battery', 'batteries'];
+function isResinProduct(strainName: string, notes?: string): boolean {
+  return containsAny(combineFields(strainName, notes), ['resin', 'rosin', 'sauce']);
+}
 
-function isBatteryProduct(strainName: string): boolean {
-  return BATTERY_KEYWORDS.some(keyword => strainName.toLowerCase().includes(keyword));
+function isCbdProduct(strainName: string, notes?: string): boolean {
+  const combined = combineFields(strainName, notes);
+  return combined.includes('cbd') || /\b\d+:\d+\b/.test(combined);
+}
+
+function isBatteryProduct(strainName: string, notes?: string): boolean {
+  return containsAny(combineFields(strainName, notes), ['battery', 'batteries']);
 }
 
 // CBD ratio presets for the selector
@@ -271,16 +272,16 @@ const App: React.FC = () => {
       const data = await analyzeProductImage(img);
       setMetadata(data);
 
-      // Auto-enable resin mode if product name contains resin keywords
-      if (isResinProduct(data.strainName)) {
+      // Auto-enable resin mode if product name or notes contains resin keywords
+      if (isResinProduct(data.strainName, data.notes)) {
         setSettings(prev => ({ ...prev, resinRosinMode: true }));
       }
-      // Auto-enable CBD mode if product name contains CBD keywords
-      if (isCbdProduct(data.strainName)) {
+      // Auto-enable CBD mode if product name or notes contains CBD keywords
+      if (isCbdProduct(data.strainName, data.notes)) {
         setSettings(prev => ({ ...prev, cbdMode: true }));
       }
-      // Auto-enable battery mode if product name contains battery keywords
-      if (isBatteryProduct(data.strainName)) {
+      // Auto-enable battery mode if product name or notes contains battery keywords
+      if (isBatteryProduct(data.strainName, data.notes)) {
         setSettings(prev => ({ ...prev, batteryMode: true }));
       }
     } catch (error) {
