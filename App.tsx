@@ -740,6 +740,22 @@ const App: React.FC = () => {
                   </button>
                 </div>
               ))}
+              {settings.resinRosinMode && metadata && (
+                <div className="py-3 px-4 bg-gray-50 rounded-xl border-2 border-gray-100">
+                  <label className="text-xs font-black text-gray-500 uppercase tracking-widest">Strain Type</label>
+                  <p className="text-xs text-gray-400 mt-0.5">Override auto-detected type for outline color</p>
+                  <select
+                    value={metadata?.strainType || ''}
+                    onChange={e => setMetadata(prev => prev ? {...prev, strainType: (e.target.value as 'sativa' | 'hybrid' | 'indica') || undefined} : null)}
+                    className="mt-2 w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium"
+                  >
+                    <option value="">Auto-detect</option>
+                    <option value="sativa">Sativa (Red outline)</option>
+                    <option value="hybrid">Hybrid (Green outline)</option>
+                    <option value="indica">Indica (Blue outline)</option>
+                  </select>
+                </div>
+              )}
               <TextArea
                 label="Additional Instructions"
                 value={settings.additionalInstructions}

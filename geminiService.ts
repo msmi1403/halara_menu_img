@@ -68,14 +68,23 @@ export async function analyzeProductImage(base64Image: string): Promise<ProductM
               type: Type.ARRAY,
               items: { type: Type.STRING }
             },
-            notes: { type: Type.STRING }
+            notes: { type: Type.STRING },
+            strainType: { type: Type.STRING }
           },
           required: ["strainName", "fruitFlavor", "primaryColor", "secondaryColors", "notes"]
         }
       }
     });
 
-    return JSON.parse(response.text || "{}") as ProductMetadata;
+    const data = JSON.parse(response.text || "{}") as ProductMetadata;
+    // Normalize strainType to lowercase and validate
+    if (data.strainType) {
+      const normalized = data.strainType.toLowerCase();
+      data.strainType = ['sativa', 'hybrid', 'indica'].includes(normalized)
+        ? (normalized as 'sativa' | 'hybrid' | 'indica')
+        : undefined;
+    }
+    return data;
   } catch (error) {
     throw categorizeError(error);
   }

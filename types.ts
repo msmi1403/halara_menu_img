@@ -5,6 +5,7 @@ export interface ProductMetadata {
   primaryColor: string;
   secondaryColors: string[];
   notes: string;
+  strainType?: 'sativa' | 'hybrid' | 'indica';
 }
 
 export interface GenerationSettings {

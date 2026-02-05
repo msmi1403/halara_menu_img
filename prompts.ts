@@ -12,6 +12,7 @@ export const analyzePrompts = {
     3. **Primary Color**: The hex color code (#RRGGBB format) of the vape device or dominant brand color.
     4. **Secondary Colors**: Hex color codes for any accent colors or secondary brand colors.
     5. **Aroma/Vibe Notes**: Identify any notes like "calming", "citrusy", "lavender", or specific vibe descriptors.
+    6. **Strain Type**: If visible on the packaging, identify if it's "sativa", "hybrid", or "indica". If not visible, make your best guess based on the strain name and flavor profile.
 
     IMPORTANT: All colors MUST be returned as hex codes (e.g., #3B82F6 for blue, #F97316 for orange).
 
@@ -46,6 +47,19 @@ CANNABIS LEAVES: Feature prominent, stylized cannabis/marijuana leaves throughou
   },
 };
 
+// Helper to determine outline color based on strain type in resin/rosin mode
+const getOutlineColor = (meta: ProductMetadata, settings?: GenerationSettings): string => {
+  if (settings?.resinRosinMode && meta.strainType) {
+    const colors: Record<string, string> = {
+      sativa: 'dark red (#8B0000)',
+      hybrid: 'dark green (#006400)',
+      indica: 'dark blue (#00008B)'
+    };
+    return colors[meta.strainType];
+  }
+  return `phthalo green or darker shade of ${meta.primaryColor}`;
+};
+
 // Unified base generator for v2/v3/v4 prompts
 const generateBase = (
   meta: ProductMetadata,
@@ -53,6 +67,7 @@ const generateBase = (
   settings?: GenerationSettings
 ): string => {
   const badgePercent = settings?.resinRosinMode ? "80%+" : "90%+";
+  const outlineColor = getOutlineColor(meta, settings);
   const basePrompt = `Create a premium cannabis vape marketing image:
 
 REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
@@ -73,7 +88,7 @@ THC BADGE: Top-right corner. Solid red (#E53935) filled circle. Inside the circl
 
 HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
 - Interior fill: Pure WHITE or light cream (NOT colored gradient)
-- Outline: Thick stroke in phthalo green or darker shade of ${meta.primaryColor}
+- Outline: Thick stroke in ${outlineColor}
 - 3D shadow effect toward bottom-right
 
 STYLE: Premium but playful, craft beverage aesthetic, Instagram-ready square format.
