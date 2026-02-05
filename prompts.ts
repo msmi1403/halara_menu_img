@@ -31,7 +31,7 @@ Also include watercolor splashes and supporting objects such as related plants, 
 
   // Watercolor only - NY mode (no flavor imagery - v3)
   watercolor: (meta: ProductMetadata) =>
-    `BACKGROUND ELEMENTS: Create an explosive burst of bright, vibrant watercolor splashes emerging from behind the product. Use ${meta.primaryColor} prominently along with bold, saturated complementary colors. The paint splashes should radiate outward from behind the products, creating dynamic depth and visual energy.`,
+    `BACKGROUND ELEMENTS: Create an explosive burst of bright, vibrant watercolor splashes emerging from behind the product. Use ${meta.primaryColor} prominently along with bold, saturated complementary colors that evoke ${meta.fruitFlavor} tones. The paint splashes should radiate outward from behind the products, creating dynamic depth and visual energy.`,
 };
 
 // Optional addon blurbs that can be appended to element sections
