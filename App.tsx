@@ -21,6 +21,36 @@ import {
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_IMAGE_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 
+// Generation mode toggles
+const GENERATION_MODES = [
+  { key: 'nyMode' as const, label: 'NY', description: 'Remove flavor imagery' },
+  { key: 'resinRosinMode' as const, label: 'Resin/Rosin', description: 'Add weed leaves to imagery' },
+  { key: 'cbdMode' as const, label: 'CBD', description: 'Show CBD ratio badge' },
+  { key: 'batteryMode' as const, label: 'Battery', description: 'No background images or badge' }
+];
+
+// Resin/Rosin keyword detection for auto-enabling mode
+const RESIN_KEYWORDS = ['resin', 'rosin', 'sauce'];
+
+function isResinProduct(strainName: string): boolean {
+  return RESIN_KEYWORDS.some(keyword => strainName.toLowerCase().includes(keyword));
+}
+
+// CBD detection for auto-enabling mode
+function isCbdProduct(strainName: string): boolean {
+  return strainName.toLowerCase().includes('cbd');
+}
+
+// Battery keyword detection for auto-enabling mode
+const BATTERY_KEYWORDS = ['battery', 'batteries'];
+
+function isBatteryProduct(strainName: string): boolean {
+  return BATTERY_KEYWORDS.some(keyword => strainName.toLowerCase().includes(keyword));
+}
+
+// CBD ratio presets for the selector
+const CBD_PRESET_RATIOS = ['1:1', '2:1', '3:1'];
+
 function getErrorMessage(error: unknown): string {
   if (error instanceof GeminiError) {
     switch (error.type) {
@@ -102,7 +132,10 @@ const App: React.FC = () => {
     numberOfVariants: 1,
     additionalInstructions: '',
     nyMode: false,
-    resinRosinMode: false
+    resinRosinMode: false,
+    cbdMode: false,
+    cbdRatio: '1:1',
+    batteryMode: false
   });
   
   const [hasApiKey, setHasApiKey] = useState<boolean | null>(null);
@@ -233,6 +266,19 @@ const App: React.FC = () => {
     try {
       const data = await analyzeProductImage(img);
       setMetadata(data);
+
+      // Auto-enable resin mode if product name contains resin keywords
+      if (isResinProduct(data.strainName)) {
+        setSettings(prev => ({ ...prev, resinRosinMode: true }));
+      }
+      // Auto-enable CBD mode if product name contains CBD keywords
+      if (isCbdProduct(data.strainName)) {
+        setSettings(prev => ({ ...prev, cbdMode: true }));
+      }
+      // Auto-enable battery mode if product name contains battery keywords
+      if (isBatteryProduct(data.strainName)) {
+        setSettings(prev => ({ ...prev, batteryMode: true }));
+      }
     } catch (error) {
       console.error("Analysis failed", error);
       alert(getErrorMessage(error));
@@ -618,6 +664,20 @@ const App: React.FC = () => {
             </div>
           </section>
 
+          <Button
+            className="w-full py-5 text-lg font-black uppercase tracking-widest shadow-2xl shadow-indigo-100 group relative overflow-hidden rounded-[2rem]"
+            onClick={handleGenerate}
+            isLoading={isGenerating}
+            disabled={!metadata || isAnalyzing}
+          >
+            <span className="relative z-10 flex items-center gap-3">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+              </svg>
+              {isGenerating ? "Processing..." : "Render Assets"}
+            </span>
+          </Button>
+
           {metadata && (
             <section className="bg-white rounded-3xl shadow-sm border border-gray-200 overflow-hidden animate-in slide-in-from-bottom-4 duration-500">
                <div className="bg-gray-50 px-6 py-4 border-b border-gray-100">
@@ -719,10 +779,7 @@ const App: React.FC = () => {
                   ))}
                 </div>
               </div>
-              {[
-                { key: 'nyMode' as const, label: 'NY', description: 'Remove flavor imagery' },
-                { key: 'resinRosinMode' as const, label: 'Resin/Rosin', description: 'Add weed leaves to imagery' }
-              ].map(({ key, label, description }) => (
+              {GENERATION_MODES.map(({ key, label, description }) => (
                 <div key={key} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl border-2 border-gray-100">
                   <div>
                     <label className="text-xs font-black text-gray-500 uppercase tracking-widest">{label}</label>
@@ -746,7 +803,7 @@ const App: React.FC = () => {
                   <p className="text-xs text-gray-400 mt-0.5">Override auto-detected type for outline color</p>
                   <select
                     value={metadata?.strainType || ''}
-                    onChange={e => setMetadata(prev => prev ? {...prev, strainType: (e.target.value as 'sativa' | 'hybrid' | 'indica') || undefined} : null)}
+                    onChange={e => setMetadata({...metadata, strainType: (e.target.value as 'sativa' | 'hybrid' | 'indica' | '') || undefined})}
                     className="mt-2 w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium"
                   >
                     <option value="">Auto-detect</option>
@@ -754,6 +811,43 @@ const App: React.FC = () => {
                     <option value="hybrid">Hybrid (Green outline)</option>
                     <option value="indica">Indica (Blue outline)</option>
                   </select>
+                </div>
+              )}
+              {settings.cbdMode && (() => {
+                const isPresetRatio = CBD_PRESET_RATIOS.includes(settings.cbdRatio || '');
+                return (
+                  <div className="py-3 px-4 bg-gray-50 rounded-xl border-2 border-gray-100">
+                    <label className="text-xs font-black text-gray-500 uppercase tracking-widest">CBD Ratio</label>
+                    <p className="text-xs text-gray-400 mt-0.5">CBD:THC ratio shown on badge</p>
+                    <select
+                      value={isPresetRatio ? settings.cbdRatio : 'custom'}
+                      onChange={e => setSettings({
+                        ...settings,
+                        cbdRatio: e.target.value === 'custom' ? '' : e.target.value
+                      })}
+                      className="mt-2 w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium"
+                    >
+                      <option value="1:1">1:1 (Balanced)</option>
+                      <option value="2:1">2:1 (CBD dominant)</option>
+                      <option value="3:1">3:1 (High CBD)</option>
+                      <option value="custom">Custom...</option>
+                    </select>
+                    {!isPresetRatio && (
+                      <input
+                        type="text"
+                        value={settings.cbdRatio || ''}
+                        onChange={e => setSettings({...settings, cbdRatio: e.target.value})}
+                        placeholder="e.g., 5:1, 10:1, 20:1"
+                        className="mt-2 w-full px-3 py-2 bg-white border-2 border-gray-200 rounded-lg text-sm font-medium"
+                      />
+                    )}
+                  </div>
+                );
+              })()}
+              {settings.batteryMode && (
+                <div className="py-3 px-4 bg-amber-50 rounded-xl border-2 border-amber-200">
+                  <p className="text-xs font-bold text-amber-800">Battery Mode</p>
+                  <p className="text-xs text-amber-700 mt-0.5">No background images or badge - gradient only</p>
                 </div>
               )}
               <TextArea
@@ -764,20 +858,6 @@ const App: React.FC = () => {
               />
             </div>
           </section>
-
-          <Button 
-            className="w-full py-5 text-lg font-black uppercase tracking-widest shadow-2xl shadow-indigo-100 group relative overflow-hidden rounded-[2rem]" 
-            onClick={handleGenerate} 
-            isLoading={isGenerating} 
-            disabled={!metadata || isAnalyzing}
-          >
-            <span className="relative z-10 flex items-center gap-3">
-              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2.5" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-              </svg>
-              {isGenerating ? "Processing..." : "Render Assets"}
-            </span>
-          </Button>
         </div>
 
         <div className="lg:col-span-8">

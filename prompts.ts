@@ -45,6 +45,10 @@ CONCENTRATE DRIPS: Include golden/amber honey-like oil drips flowing down from t
 
 CANNABIS LEAVES: Feature prominent, stylized cannabis/marijuana leaves throughout the composition - make them a key visual element, not just subtle accents. The leaves should be bold and clearly visible.`;
   },
+
+  // Battery mode - clean gradient only (v5)
+  battery: () =>
+    `BACKGROUND ONLY: No flavor elements, no fruit imagery, no watercolor splashes, no decorative objects. Keep the background clean with only the gradient.`,
 };
 
 // Helper to determine outline color based on strain type in resin/rosin mode
@@ -60,13 +64,23 @@ const getOutlineColor = (meta: ProductMetadata, settings?: GenerationSettings): 
   return `phthalo green or darker shade of ${meta.primaryColor}`;
 };
 
+// Helper to get badge content based on mode
+const getBadgeContent = (settings?: GenerationSettings): { percent: string; label: string } => {
+  if (settings?.cbdMode) {
+    const ratio = settings.cbdRatio || '1:1';
+    return { percent: ratio, label: 'CBD' };
+  }
+  const percent = settings?.resinRosinMode ? '80%+' : '90%+';
+  return { percent, label: 'TAC' };
+};
+
 // Unified base generator for v2/v3/v4 prompts
 const generateBase = (
   meta: ProductMetadata,
   elementSection: string,
   settings?: GenerationSettings
 ): string => {
-  const badgePercent = settings?.resinRosinMode ? "80%+" : "90%+";
+  const badgeContent = getBadgeContent(settings);
   const outlineColor = getOutlineColor(meta, settings);
   const basePrompt = `Create a premium cannabis vape marketing image:
 
@@ -84,7 +98,7 @@ PRODUCTS: Center composition with packaging box on left (tilted slightly to the 
 - CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
 - NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
 
-THC BADGE: Top-right corner. Solid red (#E53935) filled circle. Inside the circle, an off-white/cream inset ring stroke (NOT on the outer edge - positioned inward from the perimeter). Center text in off-white/cream bold: "${badgePercent}" on first line, "TAC" on second line.
+THC BADGE: Top-right corner. Solid red (#E53935) filled circle. Inside the circle, an off-white/cream inset ring stroke (NOT on the outer edge - positioned inward from the perimeter). Center text in off-white/cream bold: "${badgeContent.percent}" on first line, "${badgeContent.label}" on second line.
 
 HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
 - Interior fill: Pure WHITE or light cream (NOT colored gradient)
@@ -99,6 +113,44 @@ STYLE: Premium but playful, craft beverage aesthetic, Instagram-ready square for
     ? `${basePrompt}
 ADDITIONAL INSTRUCTIONS:
 ${additionalInstructions}`
+    : basePrompt;
+};
+
+// Battery mode variant - no badge, no decorative elements
+const generateBaseBattery = (
+  meta: ProductMetadata,
+  settings?: GenerationSettings
+): string => {
+  const outlineColor = getOutlineColor(meta);
+  const basePrompt = `Create a premium cannabis vape battery marketing image:
+
+REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
+- PRESERVE the exact packaging design, logo placement, text, and graphics
+- PRESERVE the exact vape device appearance and form factor
+- Change ONLY the surrounding scene and styling - keep product visuals unchanged
+
+BACKGROUND: Smooth, soft vertical gradient from lighter tint of ${meta.primaryColor} at top to warm cream (#F5F0E8) at bottom.
+CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient only.
+
+${elementSections.battery()}
+
+PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
+- CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
+- NO outlines or borders around the package or device.
+
+NO BADGE: Do NOT include any THC, TAC, or percentage badge.
+
+HERO TEXT: Bottom of image, large script typography reading "${meta.strainName}".
+- Interior fill: Pure WHITE or light cream
+- Outline: Thick stroke in ${outlineColor}
+- 3D shadow effect toward bottom-right
+
+STYLE: Premium but playful, clean and minimal, Instagram-ready square format.
+`;
+
+  const additionalInstructions = settings?.additionalInstructions?.trim();
+  return additionalInstructions
+    ? `${basePrompt}\nADDITIONAL INSTRUCTIONS:\n${additionalInstructions}`
     : basePrompt;
 };
 
@@ -165,6 +217,9 @@ Add a red circular badge in the top-right corner that says "90%+ THC" in bold wh
 
   v4: (meta: ProductMetadata, settings?: GenerationSettings) =>
     generateBase(meta, elementSections.resin(meta), settings),
+
+  v5: (meta: ProductMetadata, settings?: GenerationSettings) =>
+    generateBaseBattery(meta, settings),
 };
 
 // ============================================
@@ -173,6 +228,9 @@ Add a red circular badge in the top-right corner that says "90%+ THC" in bold wh
 
 export const ACTIVE_ANALYZE_PROMPT = analyzePrompts.v1;
 export function ACTIVE_GENERATE_PROMPT(meta: ProductMetadata, settings?: GenerationSettings): string {
+  // Mode precedence: batteryMode > cbdMode > nyMode > resinRosinMode > default (v2)
+  if (settings?.batteryMode) return generatePrompts.v5(meta, settings);
+  if (settings?.cbdMode) return generatePrompts.v2(meta, settings);
   if (settings?.nyMode) return generatePrompts.v3(meta, settings);
   if (settings?.resinRosinMode) return generatePrompts.v4(meta, settings);
   return generatePrompts.v2(meta, settings);

@@ -15,6 +15,9 @@ export interface GenerationSettings {
   additionalInstructions: string;
   nyMode: boolean;
   resinRosinMode: boolean;
+  cbdMode: boolean;
+  cbdRatio?: string;
+  batteryMode: boolean;
 }
 
 export interface GeneratedImage {
