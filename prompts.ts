@@ -32,23 +32,26 @@ Also include watercolor splashes and supporting objects such as related plants, 
   // Watercolor only - NY mode (no flavor imagery - v3)
   watercolor: (meta: ProductMetadata) =>
     `BACKGROUND ELEMENTS: Create an explosive burst of bright, vibrant watercolor splashes emerging from behind the product. Use ${meta.primaryColor} prominently along with bold, saturated complementary colors that evoke ${meta.fruitFlavor} tones. The paint splashes should radiate outward from behind the products, creating dynamic depth and visual energy.`,
-};
 
-// Optional addon blurbs that can be appended to element sections
-const elementAddons = {
-  // Weed leaves addon for Resin/Rosin mode (v4)
-  weedLeaves: `
-Include stylized cannabis/marijuana leaves throughout the composition. The weed leaves should complement the flavor imagery, creating a cohesive cannabis concentrate aesthetic.`,
+  // Resin/Rosin mode - concentrate aesthetic (v4)
+  resin: (meta: ProductMetadata) => {
+    const accentColors = meta.secondaryColors.join(", ") || "teal, purple";
+    return `FLAVOR ELEMENTS: Surround the product with vibrant ${meta.fruitFlavor} elements (fruits, botanicals, herbs).
+
+WATERCOLOR SPLASHES: Add dynamic watercolor paint splashes using ${meta.primaryColor} and accent colors (${accentColors}). The splashes should create visual energy around the products.
+
+CONCENTRATE DRIPS: Include golden/amber honey-like oil drips flowing down from the products or pooling beneath them, evoking premium cannabis concentrate.
+
+CANNABIS LEAVES: Feature prominent, stylized cannabis/marijuana leaves throughout the composition - make them a key visual element, not just subtle accents. The leaves should be bold and clearly visible.`;
+  },
 };
 
 // Unified base generator for v2/v3/v4 prompts
 const generateBase = (
   meta: ProductMetadata,
   elementSection: string,
-  settings?: GenerationSettings,
-  addon?: string
+  settings?: GenerationSettings
 ): string => {
-  const fullElementSection = addon ? elementSection + addon : elementSection;
   const badgePercent = settings?.resinRosinMode ? "80%+" : "90%+";
   const basePrompt = `Create a premium cannabis vape marketing image:
 
@@ -60,7 +63,7 @@ REFERENCE IMAGE: Use the uploaded image as the structural and brand reference.
 BACKGROUND: Smooth, soft vertical gradient from lighter tint of ${meta.primaryColor} at top to warm cream (#F5F0E8) at bottom.
 CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient only.
 
-${fullElementSection}
+${elementSection}
 
 PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
 - CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
@@ -146,7 +149,7 @@ Add a red circular badge in the top-right corner that says "90%+ THC" in bold wh
     generateBase(meta, elementSections.watercolor(meta), settings),
 
   v4: (meta: ProductMetadata, settings?: GenerationSettings) =>
-    generateBase(meta, elementSections.standard(meta), settings, elementAddons.weedLeaves),
+    generateBase(meta, elementSections.resin(meta), settings),
 };
 
 // ============================================
