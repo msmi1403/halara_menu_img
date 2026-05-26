@@ -43,7 +43,9 @@ WATERCOLOR SPLASHES: Add dynamic watercolor paint splashes using ${meta.primaryC
 
 CONCENTRATE DRIPS: Include golden/amber honey-like oil drips flowing down from the background objects or pooling beneath them, evoking premium cannabis concentrate.
 
-CANNABIS LEAVES: Feature prominent, stylized cannabis/marijuana leaves throughout the composition - make them a key visual element, not just subtle accents. The leaves should be bold and clearly visible.`;
+CANNABIS LEAVES: Feature prominent, stylized cannabis/marijuana leaves throughout the composition - make them a key visual element, not just subtle accents. The leaves should be bold and clearly visible.
+
+AIO WINDOW: If the device has a viewing window, render it as a flat amber/gold pool — no center post or internal hardware visible.`;
   },
 
   // Battery mode - clean gradient only (v5)
