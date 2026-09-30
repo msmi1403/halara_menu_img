@@ -337,6 +337,14 @@
     {
       "file": "solventless/sour-diesel-runtz/aio.jpg",
       "mode": "resin"
+    },
+    {
+      "file": "solventless/papaya-sl/aio.jpg",
+      "mode": "resin"
+    },
+    {
+      "file": "solventless/tropicana-gelato/aio.jpg",
+      "mode": "resin"
     }
   ]
 }
