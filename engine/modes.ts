@@ -11,7 +11,7 @@ function containsAny(text: string, keywords: string[]): boolean {
 }
 
 export function isResinProduct(strainName: string, notes?: string): boolean {
-  return containsAny(combineFields(strainName, notes), ['resin', 'rosin', 'sauce']);
+  return containsAny(combineFields(strainName, notes), ['resin', 'rosin', 'sauce', 'solventless']);
 }
 
 export function isCbdProduct(strainName: string, notes?: string): boolean {
