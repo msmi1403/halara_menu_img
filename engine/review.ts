@@ -68,11 +68,14 @@ export function expectationFor(meta: ProductMetadata, settings: GenerationSettin
   return { strainName: meta.strainName, mode, badge, outlineColor, strainType: meta.strainType, cartBox: isCartPackaging(meta), slimAio: isSlimAio(meta, settings) };
 }
 
+// Compliance (Malcolm, Sep 30 2026): cannabis imagery can't appeal to children.
+const NO_CANDY = " No pictures of candy, gummies, lollipops, hard candies or other sweets anywhere in the scene; any drawn candy is a FAIL. Words printed on the real packaging (a flavor line like \"Diesel and Candy\") are not candy imagery and do not count.";
+
 const MODE_RULES: Record<Mode, string> = {
-  standard: "Flavor elements (fruit, botanicals, herbs) and watercolor splashes surround the product.",
-  ny: "NO fruit, food, or flavor objects anywhere. Only abstract watercolor paint splashes bursting from behind the product.",
-  resin: "Stylized cannabis leaves are clearly visible, and golden/amber oil drips appear. Flavor elements and watercolor splashes are allowed.",
-  cbd: "Flavor elements (fruit, botanicals, herbs) and watercolor splashes surround the product.",
+  standard: "Flavor elements (fruit, botanicals, herbs) and watercolor splashes surround the product." + NO_CANDY,
+  ny: "NO fruit, food, or flavor objects anywhere. Only abstract watercolor paint splashes bursting from behind the product." + NO_CANDY,
+  resin: "Stylized cannabis leaves are clearly visible, and golden/amber oil drips appear. Flavor elements and watercolor splashes are allowed." + NO_CANDY,
+  cbd: "Flavor elements (fruit, botanicals, herbs) and watercolor splashes surround the product." + NO_CANDY,
   battery: "Plain gradient background only. No fruit, no splashes, no decorative objects, no badge.",
 };
 

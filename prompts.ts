@@ -122,6 +122,8 @@ CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient
 
 ${elementSection}
 
+NO CANDY (compliance): Never show candy, gummies, gummy bears, lollipops, hard candies, sweets, or any treat that appeals to children, even when the flavor says "candy", "gummy" or "sweet". Show a candy-like flavor with real fruit, botanicals and color instead.
+
 ${PRODUCTS_LINE}
 - CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
 - NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.${deviceShape(meta, settings)}
