@@ -20,9 +20,10 @@ import { ProductMetadata, GenerationSettings } from "../types";
 import { analyzeProductImage, generateAdImage } from "../engine/gemini";
 import { isResinProduct, isCbdProduct, isBatteryProduct } from "../engine/modes";
 import { preflight, boxRatio } from "../engine/potency";
+import jpeg from "jpeg-js";
 import {
   ANY_CBD_RATIO, Expectation, ImageInput, Mode, ReviewResult,
-  expectationFor, reviewImage, CHECKS,
+  expectationFor, reviewImage, CHECKS, decodeRgba, Rgba,
 } from "../engine/review";
 
 const HALARA_WEB = join(homedir(), "Developer/HalaraMarketing/website/halara-web");
@@ -33,6 +34,31 @@ const STRAINS_TS = join(HALARA_WEB, "lib/data/strains.ts");
 const MANIFEST = join(dirname(new URL(import.meta.url).pathname), "../references/approved.json");
 
 // ---------- setup ----------
+
+// The slim AIO's mouthpiece must be exactly as wide as the body. The vision reviewer
+// can't judge that (flip-flopped on the same image, Sep 29 and Sep 30 2026), so every
+// run writes a side-by-side close-up of the device tops for a human/Claude to check.
+// The crop is the house-style device spot: right of centre, upper half.
+function writeCapSheet(files: string[], outPath: string): string | null {
+  const decoded = files.map(f => decodeRgba(new Uint8Array(readFileSync(f)))).filter((d): d is Rgba => d !== null);
+  if (!decoded.length) return null;
+  const crops = decoded.filter(d => d.width === decoded[0].width && d.height === decoded[0].height);
+  const side = Math.round(0.35 * crops[0].width);
+  const sheet = new Uint8Array(side * crops.length * side * 4);
+  crops.forEach((img, n) => {
+    const x0 = Math.round(0.5 * img.width);
+    const y0 = Math.round(0.2 * img.height);
+    for (let y = 0; y < side; y++) {
+      for (let x = 0; x < side; x++) {
+        const src = ((y0 + y) * img.width + (x0 + x)) * 4;
+        const dst = (y * side * crops.length + n * side + x) * 4;
+        sheet.set(img.data.subarray(src, src + 4), dst);
+      }
+    }
+  });
+  writeFileSync(outPath, jpeg.encode({ data: sheet, width: side * crops.length, height: side }, 90).data);
+  return outPath;
+}
 
 function loadKey(): string {
   if (process.env.GEMINI_API_KEY) return process.env.GEMINI_API_KEY;
@@ -256,9 +282,14 @@ async function cmdMake(ai: GoogleGenAI, pos: string[], flags: Record<string, str
     variants: results.map(r => ({ file: r.file, verdict: r.review.verdict, read: r.review.read, checks: r.review.checks })),
   };
   writeFileSync(join(outDir, "review.json"), JSON.stringify(summary, null, 2));
+  const usable = results.filter(r => r.review.verdict !== "reject");
+  if (exp.slimAio && usable.length) {
+    const sheet = writeCapSheet(usable.map(r => r.file), join(outDir, "caps.jpg"));
+    if (sheet) console.error(`Mouthpiece close-ups (${usable.map(r => basename(r.file)).join(", ")}, left to right): ${sheet}. Look before showing Malcolm.`);
+  }
   const failed = variants - results.length;
   if (failed) console.error(`${failed} variant(s) failed every attempt (see ERROR lines).`);
-  const ok = results.filter(r => r.review.verdict !== "reject").length;
+  const ok = usable.length;
   console.error(`${ok}/${variants} usable. Review: ${join(outDir, "review.json")}`);
   console.log(JSON.stringify({ outDir, usable: ok, variants: summary.variants.map(v => ({ file: v.file, verdict: v.verdict })) }));
 }

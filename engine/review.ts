@@ -1,4 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
+import { PNG } from "pngjs";
+import jpeg from "jpeg-js";
 import { ProductMetadata, GenerationSettings } from "../types.js";
 import { getBadgeContent, getOutlineColor, isCartPackaging, isSlimAio } from "../prompts.js";
 import { ANALYZE_MODEL, categorizeError } from "./gemini.js";
@@ -194,6 +196,47 @@ export function imageSize(bytes: Uint8Array): { width: number; height: number } 
   return null;
 }
 
+// Share of solid-red pixels inside the badge, measured at its house-style spot (top
+// right, same place in every approved image). The right badge is a red disc with cream
+// text: every approved site image scores 0.58+. An inverted one (cream disc, red text)
+// scores ~0.2-0.3. The vision reviewer passed inverted badges and failed correct ones
+// when asked (Sep 30 2026), so the fill is measured, not judged. null = unreadable.
+export const BADGE_MIN_RED_SHARE = 0.45;
+
+export interface Rgba { width: number; height: number; data: Uint8Array }
+
+// PNG or JPEG bytes to RGBA (4 bytes per pixel). null = not an image we can decode.
+export function decodeRgba(bytes: Uint8Array): Rgba | null {
+  const isPng = bytes[0] === 0x89 && bytes[1] === 0x50;
+  const isJpeg = bytes[0] === 0xff && bytes[1] === 0xd8;
+  if (!isPng && !isJpeg) return null;
+  try {
+    return isPng ? PNG.sync.read(Buffer.from(bytes)) : jpeg.decode(bytes, { useTArray: true });
+  } catch {
+    return null; // a corrupt file must not throw away the (already paid for) review
+  }
+}
+
+export function badgeRedShare(bytes: Uint8Array): number | null {
+  const decoded = decodeRgba(bytes);
+  if (!decoded) return null;
+  const { width, height, data } = decoded;
+  const cx = 0.848 * width;
+  const cy = 0.152 * height;
+  const r = 0.066 * width;
+  let inside = 0;
+  let red = 0;
+  for (let y = Math.floor(cy - r); y < cy + r; y += 2) {
+    for (let x = Math.floor(cx - r); x < cx + r; x += 2) {
+      if (Math.hypot(x - cx, y - cy) >= r) continue;
+      const i = (y * width + x) * 4;
+      inside++;
+      if (data[i] > 170 && data[i + 1] < 90 && data[i + 2] < 90) red++;
+    }
+  }
+  return inside ? red / inside : null;
+}
+
 function base64ToBytes(b64: string): Uint8Array {
   if (typeof Buffer !== "undefined") return new Uint8Array(Buffer.from(b64, "base64"));
   const bin = atob(b64);
@@ -241,7 +284,8 @@ export async function reviewImage(
   }
 
   const byId = new Map((raw.checks || []).map(c => [c.id, c]));
-  const size = imageSize(base64ToBytes(candidate.data));
+  const candidateBytes = base64ToBytes(candidate.data);
+  const size = imageSize(candidateBytes);
 
   const checks: CheckResult[] = CHECKS.map(def => {
     if (def.id === "size") {
@@ -256,6 +300,15 @@ export async function reviewImage(
     if (def.id === "badge" && !badgeMatches(raw.badge_text || "", exp.badge)) {
       pass = false;
       reason = `badge reads "${raw.badge_text}", expected ${exp.badge === null ? "no badge" : `"${exp.badge}"`}. ${reason}`;
+    }
+    if (def.id === "badge" && exp.badge !== null) {
+      const share = badgeRedShare(candidateBytes);
+      if (share === null) {
+        reason = `badge fill not measured (image could not be decoded). ${reason}`;
+      } else if (share < BADGE_MIN_RED_SHARE) {
+        pass = false;
+        reason = `badge is not a solid red disc (${Math.round(share * 100)}% red inside, needs ${BADGE_MIN_RED_SHARE * 100}%+); likely inverted, cream fill with red text. ${reason}`;
+      }
     }
     if (def.id === "strain_name" && normalizeText(raw.hero_text || "") !== normalizeText(exp.strainName)) {
       pass = false;

@@ -1,6 +1,8 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { badgeMatches, normalizeText, imageSize, verdictFor, expectationFor, modeFor, ANY_CBD_RATIO, CHECKS } from "./review.js";
+import { badgeMatches, normalizeText, imageSize, verdictFor, expectationFor, modeFor, ANY_CBD_RATIO, CHECKS, badgeRedShare, BADGE_MIN_RED_SHARE } from "./review.js";
+import { PNG } from "pngjs";
+import jpeg from "jpeg-js";
 import type { GenerationSettings, ProductMetadata } from "../types.js";
 
 const base: GenerationSettings = {
@@ -65,4 +67,31 @@ test("reads PNG and JPEG dimensions from bytes", () => {
   const jpg = new Uint8Array([0xff, 0xd8, 0xff, 0xe0, 0x00, 0x04, 0x00, 0x00, 0xff, 0xc0, 0x00, 0x11, 0x08, 0x02, 0x00, 0x02, 0x80, 0x03, 0, 0, 0]);
   assert.deepEqual(imageSize(jpg), { width: 640, height: 512 });
   assert.equal(imageSize(new Uint8Array([1, 2, 3])), null);
+});
+
+// A 200x200 image, cream everywhere, with the badge disc (house-style spot) in `disc`.
+function badgeImage(disc: [number, number, number]): Buffer {
+  const size = 200;
+  const png = new PNG({ width: size, height: size });
+  for (let y = 0; y < size; y++) {
+    for (let x = 0; x < size; x++) {
+      const inDisc = Math.hypot(x - 0.848 * size, y - 0.152 * size) < 0.1 * size;
+      const [r, g, b] = inDisc ? disc : [245, 240, 232];
+      const i = (y * size + x) * 4;
+      png.data[i] = r; png.data[i + 1] = g; png.data[i + 2] = b; png.data[i + 3] = 255;
+    }
+  }
+  return PNG.sync.write(png);
+}
+
+test("badge fill: a red disc passes, an inverted cream disc fails, in PNG and JPEG", () => {
+  const red = badgeImage([229, 57, 53]);
+  const cream = badgeImage([245, 240, 232]);
+  assert.ok(badgeRedShare(new Uint8Array(red))! >= BADGE_MIN_RED_SHARE);
+  assert.ok(badgeRedShare(new Uint8Array(cream))! < BADGE_MIN_RED_SHARE);
+  const asJpeg = (png: Buffer) => { const d = PNG.sync.read(png); return jpeg.encode({ data: d.data, width: d.width, height: d.height }, 95).data; };
+  assert.ok(badgeRedShare(new Uint8Array(asJpeg(red)))! >= BADGE_MIN_RED_SHARE);
+  assert.ok(badgeRedShare(new Uint8Array(asJpeg(cream)))! < BADGE_MIN_RED_SHARE);
+  assert.equal(badgeRedShare(new Uint8Array([0x47, 0x49, 0x46])), null);
+  assert.equal(badgeRedShare(new Uint8Array([0xff, 0xd8, 0x00, 0x01])), null); // truncated JPEG
 });

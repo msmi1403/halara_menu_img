@@ -303,7 +303,7 @@
       "mode": "cbd"
     },
     {
-      "file": "high-thc/strawberry-sugar/cart.png",
+      "file": "high-thc/strawberry-sugar/cart.jpg",
       "mode": "standard"
     },
     {
@@ -321,6 +321,18 @@
     {
       "file": "resin-sauce/tropicana-banana-rs/cart.png",
       "mode": "resin"
+    },
+    {
+      "file": "high-thc/NY/pink-lemonade-haze/aio.jpg",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/strawberry-sugar/aio.jpg",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/northern-lights/aio.jpg",
+      "mode": "ny"
     }
   ]
 }
