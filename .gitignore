@@ -34,3 +34,4 @@ test-results/
 
 # TypeScript cache
 *.tsbuildinfo
+.vercel

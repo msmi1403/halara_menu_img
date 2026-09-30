@@ -1,4 +1,4 @@
-import { ProductMetadata, GenerationSettings } from "./types";
+import { ProductMetadata, GenerationSettings } from "./types.js";
 
 // ============================================
 // ANALYZE PROMPTS
@@ -13,6 +13,8 @@ export const analyzePrompts = {
     4. **Secondary Colors**: Hex color codes for any accent colors or secondary brand colors.
     5. **Aroma/Vibe Notes**: Identify any notes like "calming", "citrusy", "lavender", or specific vibe descriptors.
     6. **Strain Type**: If visible on the packaging, identify if it's "sativa", "hybrid", or "indica". If not visible, make your best guess based on the strain name and flavor profile.
+    7. **Product Line**: The product line printed on the box, verbatim (e.g. "Resin Sauce", "Live Diamond Sauce", "Solventless", "All-In-One", "Battery"). Empty if none.
+    8. **Box Potency**: The potency printed on the box, verbatim (e.g. "94% TAC", "THC 75%", "CBD 3:1"). Empty if none is printed. Never estimate.
 
     IMPORTANT: All colors MUST be returned as hex codes (e.g., #3B82F6 for blue, #F97316 for orange).
 
@@ -54,7 +56,7 @@ AIO WINDOW: If the device has a viewing window, render it as a flat amber/gold p
 };
 
 // Helper to determine outline color based on strain type in resin/rosin mode
-const getOutlineColor = (meta: ProductMetadata, settings?: GenerationSettings): string => {
+export const getOutlineColor = (meta: ProductMetadata, settings?: GenerationSettings): string => {
   if (settings?.resinRosinMode && meta.strainType) {
     const colors: Record<string, string> = {
       sativa: 'dark red (#8B0000)',
@@ -67,7 +69,7 @@ const getOutlineColor = (meta: ProductMetadata, settings?: GenerationSettings): 
 };
 
 // Helper to get badge content based on mode
-const getBadgeContent = (settings?: GenerationSettings): { percent: string; label: string } => {
+export const getBadgeContent = (settings?: GenerationSettings): { percent: string; label: string } => {
   if (settings?.cbdMode) {
     const ratio = settings.cbdRatio || '1:1';
     return { percent: ratio, label: 'CBD' };
@@ -75,6 +77,30 @@ const getBadgeContent = (settings?: GenerationSettings): { percent: string; labe
   const percent = settings?.resinRosinMode ? '80%+' : '90%+';
   return { percent, label: 'TAC' };
 };
+
+// Composition (Malcolm, Sep 29 2026): both products lean, neither stands stiff.
+// The package faces the camera (front panel only, no side panel) but is rotated in
+// the picture plane so it leans a little LEFT; the device leans a little RIGHT.
+// "Lean" means rotate flat, like a card propped at an angle, never a 3D turn: a
+// turned cart box shows its side panel, which crowds the front and garbles the text.
+export const isCartPackaging = (meta: ProductMetadata): boolean =>
+  /cart|510/i.test(`${meta.productLine ?? ''} ${meta.notes}`);
+
+// The slim Halara All-In-One (High THC / CBD) is one straight slab: the mouthpiece
+// cap is exactly as wide and thick as the body. The model likes to flare or bevel
+// the cap (Malcolm, Sep 29 2026). The resin/solventless AIO is a different, chunkier
+// device, so the rule is scoped away from resin mode.
+export const isSlimAio = (meta: ProductMetadata, settings?: GenerationSettings): boolean =>
+  !settings?.resinRosinMode && !isCartPackaging(meta) && /all.?in.?one|aio|disposable/i.test(`${meta.productLine ?? ''} ${meta.notes}`);
+
+const deviceShape = (meta: ProductMetadata, settings?: GenerationSettings): string =>
+  isSlimAio(meta, settings)
+    ? `\n- DEVICE SHAPE: A flat rectangular slab with straight parallel sides. The mouthpiece cap is EXACTLY the same width and thickness as the body: no flare, no step, no bevel, no taper, no wider or narrower cap. One continuous silhouette from top to bottom, as in the reference photo.`
+    : '';
+
+const PRODUCTS_LINE = `PRODUCTS: Center composition. Packaging on the left, device on the right.
+- PACKAGE: Front-facing, only the front panel visible, NO side panel and no 3/4 turn. Rotate it flat in the picture plane about 8 degrees counter-clockwise so it leans slightly to the LEFT.
+- DEVICE: Rotate it about 12 degrees clockwise so it leans slightly to the RIGHT. Neither product stands perfectly vertical.`;
 
 // Unified base generator for v2/v3/v4 prompts
 const generateBase = (
@@ -96,9 +122,9 @@ CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient
 
 ${elementSection}
 
-PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
+${PRODUCTS_LINE}
 - CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
-- NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.
+- NO outlines or borders around the package or device. Products should blend naturally into the scene without any drawn edges or strokes around them.${deviceShape(meta, settings)}
 
 THC BADGE: Top-right corner. Solid red (#E53935) filled circle. Inside the circle, an off-white/cream inset ring stroke (NOT on the outer edge - positioned inward from the perimeter). Center text in off-white/cream bold: "${badgeContent.percent}" on first line, "${badgeContent.label}" on second line.
 
@@ -136,9 +162,9 @@ CRITICAL: NO streaks, NO radiating lines, NO burst effects. Pure smooth gradient
 
 ${elementSections.battery()}
 
-PRODUCTS: Center composition with packaging box on left (tilted slightly to the left), vape device on right angled slightly to the right.
+${PRODUCTS_LINE}
 - CRITICAL: Products must match the reference image EXACTLY - do not redesign or alter them
-- NO outlines or borders around the package or device.
+- NO outlines or borders around the package or device.${deviceShape(meta, settings)}
 
 NO BADGE: Do NOT include any THC, TAC, or percentage badge.
 

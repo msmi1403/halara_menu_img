@@ -1,0 +1,326 @@
+{
+  "generated": "2026-09-29T17:54:48.691Z",
+  "note": "Site images that passed or only flagged in calibration. Hand-edit to add or remove.",
+  "images": [
+    {
+      "file": "high-thc/apple-fritter/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/apricot-octane/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/blue-dream/aio.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/blue-dream/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/cannalope-chronic/aio.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/cannalope-chronic/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/citrus-blonde/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/durban-tangie/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/emerald-mango/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/granddaddy-purple/aio.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/granddaddy-purple/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/guava-gelato/aio.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/guava-gelato/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/honeydew-glue/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/juicy-jack/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/kush-cookies/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/lava-berries/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/lychee-goji-berry-tea/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/maui-wowie/aio.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/maui-wowie/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/northern-lights/aio.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/northern-lights/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/pineapple-express/aio.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/pineapple-express/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/purple-daddy/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/strawberry-stray/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/strawnana-smoothie/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/tropical-trip/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/watermelon-z-og/aio.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/watermelon-z-og/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/wicked-apple/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/zkooby-znakz/aio.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/zkooby-znakz/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/NY/apricot-octane/aio.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/apricot-octane/cart.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/blue-dream/aio.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/blue-dream/cart.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/granddaddy-purple/aio.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/granddaddy-purple/cart.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/maui-wowie/aio.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/pineapple-express/aio.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/pineapple-express/cart.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/watermelon-z-og/aio.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/watermelon-z-og/cart.png",
+      "mode": "ny"
+    },
+    {
+      "file": "high-thc/NY/zkooby-znakz/aio.png",
+      "mode": "ny"
+    },
+    {
+      "file": "resin-sauce/banana-mochi-funk/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/blue-dream-rs/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/blueberry-muffin/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/cadillac-lemonade/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/durban-diesel/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/fire-og/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/forbidden-roses/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/gmo-cookies/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/granddaddy-purple-rs/aio.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/grapes-and-cream/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/hella-cherry-jelly/aio.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/king-fatso/aio.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/king-fatso/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/lemon-wreck-slushie/aio.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/lemon-wreck-slushie/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/lilac-trainwreck/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/papaya-melon/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/strawberry-jack/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/trainwreck/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/yeti-og/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "solventless/banana-god/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "solventless/dozicot/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "solventless/gravity-gush/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "solventless/moroccan-peaches/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "solventless/sour-diesel-runtz/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "solventless/superboof-bomb/aio.png",
+      "mode": "resin"
+    },
+    {
+      "file": "solventless/the-cough/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "solventless/tropicana-cherries/cart.png",
+      "mode": "resin"
+    },
+    {
+      "file": "high-cbd/couch-cruiser/aio.png",
+      "mode": "cbd"
+    },
+    {
+      "file": "high-cbd/day-tripper/aio.png",
+      "mode": "cbd"
+    },
+    {
+      "file": "high-thc/strawberry-sugar/cart.png",
+      "mode": "standard"
+    },
+    {
+      "file": "high-cbd/electric-peach/aio.png",
+      "mode": "cbd"
+    },
+    {
+      "file": "resin-sauce/strawberry-jack/aio.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/tropicana-banana-rs/aio.png",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/tropicana-banana-rs/cart.png",
+      "mode": "resin"
+    }
+  ]
+}

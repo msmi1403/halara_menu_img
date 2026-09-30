@@ -1,20 +1,32 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Halara Menu Imagineer
 
-# Run and deploy your AI Studio app
+Turns a product photo into a Halara menu image in the house style, then scores it against a check list before anyone downloads it.
 
-This contains everything you need to run your app locally.
+- **Web app:** https://halara-imagineer.vercel.app (team password). Vercel project `halara-imagineer`.
+- **Claude skill:** `/menu-images` in HalaraKB (`~/Documents/HalaraKB/.claude/skills/menu-images/SKILL.md`) runs the same engine from the CLI.
 
-View your app in AI Studio: https://ai.studio/apps/drive/12JtnKrvL4mCWdOZxzDFvFRTz2q2wqOZI
+## Layout
 
-## Run Locally
+| Path | What it is |
+|---|---|
+| `prompts.ts` | The house style. The only place style rules live. |
+| `engine/` | Shared by the web app, the server and the CLI: Gemini calls, mode detection, the potency preflight (badge never overstates the box beyond the 10% legal tolerance; resin is always 80%+), and the review check list. |
+| `api/` | Vercel functions: `check`, `analyze`, `generate`, `review`. They hold the Gemini key and require the team password. Every file here is a public route, so no tests or scratch files in this folder. |
+| `cli/imagineer.ts` | `make` / `review` / `calibrate` for the Claude skill. |
+| `references/` | `approved.json` (the answer key of approved site images) and `examples/` (small copies bundled with the server for the reviewer). |
 
-**Prerequisites:**  Node.js
+## Settings (Vercel → Project → Environment Variables)
 
+- `GEMINI_API_KEY` (saved in the Vercel project as `HALARA_MENU_IMAGES_2`; either name works): the Google AI key. Lives only on the server.
+- `APP_PASSWORD`: the team password. If it's missing, the app refuses everyone.
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+## Develop
+
+```bash
+npm install
+npx tsx --test tests/unit/*.test.ts engine/*.test.ts   # no API calls
+VERCEL=1 npx vite build && APP_PASSWORD=local-test npx tsx scripts/local-server.ts   # http://localhost:4173
+vercel deploy --prod
+```
+
+Server files import each other with a `.js` ending (`from "./_lib.js"`). Vercel runs them as plain Node ES modules, which need it; leaving it off deploys fine and then crashes every call.

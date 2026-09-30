@@ -1,9 +1,11 @@
 import React, { useState, useRef, useEffect, useCallback } from 'react';
-import { analyzeProductImage, generateAdImage, GeminiError, GeminiErrorType } from './geminiService';
+import { analyzeProductImage, generateAdImage, reviewAdImage, checkPassword, getPassword, setPassword, GeminiError, GeminiErrorType, PASSWORD_REJECTED } from './geminiService';
 import { ProductMetadata, GenerationSettings, GeneratedImage, HistoryItem } from './types';
 import { Button } from './components/Button';
 import { Input, TextArea } from './components/Input';
 import { HistoryDrawer } from './components/HistoryDrawer';
+import { PasswordGate } from './components/PasswordGate';
+import { ReviewBadge } from './components/ReviewBadge';
 import {
   getAllHistory,
   saveHistoryItem,
@@ -16,6 +18,7 @@ import {
   importData,
   StorageEstimate
 } from './dbService';
+import { isResinProduct, isCbdProduct, isBatteryProduct } from './engine/modes';
 
 // Image input validation constants
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -29,30 +32,6 @@ const GENERATION_MODES = [
   { key: 'batteryMode' as const, label: 'Battery', description: 'No background images or badge' }
 ];
 
-// Product type detection for auto-enabling modes
-// All functions check combined strainName + notes since AI may put product type in notes
-
-function combineFields(strainName: string, notes?: string): string {
-  return (strainName + ' ' + (notes || '')).toLowerCase();
-}
-
-function containsAny(text: string, keywords: string[]): boolean {
-  return keywords.some(keyword => text.includes(keyword));
-}
-
-function isResinProduct(strainName: string, notes?: string): boolean {
-  return containsAny(combineFields(strainName, notes), ['resin', 'rosin', 'sauce']);
-}
-
-function isCbdProduct(strainName: string, notes?: string): boolean {
-  const combined = combineFields(strainName, notes);
-  return combined.includes('cbd') || /\b\d+:\d+\b/.test(combined);
-}
-
-function isBatteryProduct(strainName: string, notes?: string): boolean {
-  return containsAny(combineFields(strainName, notes), ['battery', 'batteries']);
-}
-
 // CBD ratio presets for the selector
 const CBD_PRESET_RATIOS = ['1:1', '2:1', '3:1'];
 
@@ -64,7 +43,7 @@ function getErrorMessage(error: unknown): string {
       case GeminiErrorType.QUOTA_EXCEEDED:
         return 'API quota exceeded. Please wait a few minutes and try again, or check your API usage limits.';
       case GeminiErrorType.INVALID_API_KEY:
-        return 'Invalid API key. Please check your API key configuration.';
+        return 'The team password was not accepted. Reload and sign in again.';
       case GeminiErrorType.CONTENT_FILTERED:
         return 'The content was filtered by safety settings. Try adjusting your input image or instructions.';
       case GeminiErrorType.NO_IMAGE_DATA:
@@ -208,12 +187,8 @@ const App: React.FC = () => {
 
   useEffect(() => {
     async function init(): Promise<void> {
-      if (window.aistudio) {
-        const selected = await window.aistudio.hasSelectedApiKey();
-        setHasApiKey(selected);
-      } else {
-        setHasApiKey(true);
-      }
+      const saved = getPassword();
+      setHasApiKey(saved ? await checkPassword(saved) : false);
       await refreshHistory();
       await requestPersistentStorage();
       await refreshStorageInfo();
@@ -277,9 +252,9 @@ const App: React.FC = () => {
       // (nyMode is user-only toggle, not auto-detected)
       setSettings(prev => ({
         ...prev,
-        resinRosinMode: isResinProduct(data.strainName, data.notes),
-        cbdMode: isCbdProduct(data.strainName, data.notes),
-        batteryMode: isBatteryProduct(data.strainName, data.notes)
+        resinRosinMode: isResinProduct(data.strainName, `${data.notes} ${data.productLine ?? ''}`),
+        cbdMode: isCbdProduct(data.strainName, `${data.notes} ${data.productLine ?? ''}`),
+        batteryMode: isBatteryProduct(data.strainName, `${data.notes} ${data.productLine ?? ''}`)
       }));
     } catch (error) {
       console.error("Analysis failed", error);
@@ -292,11 +267,6 @@ const App: React.FC = () => {
   async function handleGenerate(): Promise<void> {
     if (!sourceImage || !metadata || !sourceBlob) return;
 
-    if (window.aistudio && !(await window.aistudio.hasSelectedApiKey())) {
-      await window.aistudio.openSelectKey();
-      setHasApiKey(true);
-    }
-
     setIsGenerating(true);
     try {
       const imagePromises = Array(settings.numberOfVariants)
@@ -304,7 +274,7 @@ const App: React.FC = () => {
         .map(() => generateAdImage(sourceImage, metadata, settings));
       const b64Results = await Promise.all(imagePromises);
 
-      const newVariants = await Promise.all(
+      const newVariants: GeneratedImage[] = await Promise.all(
         b64Results.map(async (b64WithPrefix) => {
           const b64Data = b64WithPrefix.split(',')[1];
           const blob = await base64ToBlob(b64Data);
@@ -316,6 +286,12 @@ const App: React.FC = () => {
           };
         })
       );
+
+      // Score every new image against the check list before anyone downloads it.
+      const reviews = await Promise.all(
+        b64Results.map(b64 => reviewAdImage(b64, sourceImage, metadata, settings).catch(() => undefined))
+      );
+      newVariants.forEach((v, i) => { v.review = reviews[i]; });
 
       const updatedResults = [...newVariants, ...results].slice(0, 10);
       setResults(updatedResults);
@@ -340,6 +316,7 @@ const App: React.FC = () => {
       await refreshStorageInfo();
     } catch (error: unknown) {
       console.error("Generation/Save failed", error);
+      if (error instanceof GeminiError && error.message === PASSWORD_REJECTED) { setHasApiKey(false); return; }
       alert(getErrorMessage(error));
     } finally {
       setIsGenerating(false);
@@ -451,27 +428,8 @@ const App: React.FC = () => {
     }
   }
 
-  if (hasApiKey === false && window.aistudio) {
-    const aistudio = window.aistudio;
-    return (
-      <div className="min-h-screen bg-[#f8fafc] flex items-center justify-center p-6 text-center">
-        <div className="max-w-md bg-white p-10 rounded-[2.5rem] shadow-2xl border border-gray-100">
-          <div className="bg-indigo-600 w-20 h-20 rounded-3xl flex items-center justify-center mx-auto mb-8 shadow-xl shadow-indigo-100">
-             <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
-              </svg>
-          </div>
-          <h1 className="text-3xl font-black text-gray-900 mb-4 tracking-tight">Halara Menu Imagineer</h1>
-          <p className="text-gray-500 mb-8 font-medium leading-relaxed">To generate high-end commercial assets, select an API key from a paid project.</p>
-          <Button className="w-full py-4 text-lg" onClick={async () => {
-            await aistudio.openSelectKey();
-            setHasApiKey(true);
-          }}>
-            Connect API Key
-          </Button>
-        </div>
-      </div>
-    );
+  if (hasApiKey === false) {
+    return <PasswordGate onUnlock={() => setHasApiKey(true)} />;
   }
 
   if (hasApiKey === null) {
@@ -905,6 +863,7 @@ const App: React.FC = () => {
                     <span className="text-[10px] font-black text-indigo-600 uppercase tracking-widest block mb-0.5">Variant {img.id.slice(0, 4)}</span>
                     <h4 className="text-base font-black text-gray-800 tracking-tight">{metadata?.strainName}</h4>
                   </div>
+                  <ReviewBadge review={img.review} />
                   <button onClick={() => {
                     revokeUrl(img.url);
                     setResults(prev => prev.filter(r => r.id !== img.id));

@@ -1,93 +1,86 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import { ProductMetadata, GenerationSettings } from "./types";
-import { ACTIVE_ANALYZE_PROMPT, ACTIVE_GENERATE_PROMPT } from "./prompts";
+import { GeminiError, GeminiErrorType } from "./engine/gemini";
+import type { ReviewResult } from "./engine/review";
 
-export enum GeminiErrorType {
-  NETWORK = 'NETWORK',
-  QUOTA_EXCEEDED = 'QUOTA_EXCEEDED',
-  INVALID_API_KEY = 'INVALID_API_KEY',
-  CONTENT_FILTERED = 'CONTENT_FILTERED',
-  NO_IMAGE_DATA = 'NO_IMAGE_DATA',
-  UNKNOWN = 'UNKNOWN'
+export { GeminiError, GeminiErrorType } from "./engine/gemini";
+
+// The browser never holds the Gemini key. Every call goes to this app's own
+// server functions (api/*), which hold the key and check the team password.
+
+const PASSWORD_KEY = "imagineer-password";
+
+export function getPassword(): string {
+  try { return localStorage.getItem(PASSWORD_KEY) || ""; } catch { return ""; }
 }
 
-export class GeminiError extends Error {
-  type: GeminiErrorType;
+export function setPassword(password: string): void {
+  try { localStorage.setItem(PASSWORD_KEY, password); } catch { /* private window: stays in memory only */ }
+}
 
-  constructor(type: GeminiErrorType, message: string) {
-    super(message);
-    this.type = type;
-    this.name = 'GeminiError';
+export function clearPassword(): void {
+  try { localStorage.removeItem(PASSWORD_KEY); } catch { /* nothing stored */ }
+}
+
+export const PASSWORD_REJECTED = "PASSWORD_REJECTED";
+
+async function post<T>(path: string, body: unknown, password = getPassword()): Promise<T> {
+  let res: Response;
+  try {
+    res = await fetch(`${import.meta.env.BASE_URL}api/${path}`, {
+      method: "POST",
+      headers: { "content-type": "application/json", "x-imagineer-password": password },
+      body: JSON.stringify(body),
+    });
+  } catch {
+    throw new GeminiError(GeminiErrorType.NETWORK, "Network connection failed");
+  }
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401) {
+    clearPassword();
+    throw new GeminiError(GeminiErrorType.INVALID_API_KEY, PASSWORD_REJECTED);
+  }
+  if (res.status === 413) throw new GeminiError(GeminiErrorType.UNKNOWN, "That photo is too large to send. Try a smaller one.");
+  if (res.status === 429) throw new GeminiError(GeminiErrorType.QUOTA_EXCEEDED, data.error || "API quota exceeded");
+  if (!res.ok) throw new GeminiError(GeminiErrorType.UNKNOWN, data.error || `Server error ${res.status}`);
+  return data as T;
+}
+
+export async function checkPassword(password: string): Promise<boolean> {
+  try {
+    await post("check", {}, password);
+    return true;
+  } catch {
+    return false;
   }
 }
 
-function categorizeError(error: unknown): GeminiError {
-  const message = error instanceof Error ? error.message : String(error);
-  const lowerMessage = message.toLowerCase();
+// Phone photos can be 5+ MB; the server's request cap is 4.5 MB. Shrink to
+// 2048px on the long side as JPEG, which is plenty for the model to read the box.
+const MAX_SIDE = 2048;
 
-  if (lowerMessage.includes('network') || lowerMessage.includes('fetch') || lowerMessage.includes('failed to fetch')) {
-    return new GeminiError(GeminiErrorType.NETWORK, 'Network connection failed');
-  }
+async function prepare(base64: string): Promise<{ data: string; mimeType: string }> {
+  const img = new Image();
+  img.src = `data:image/*;base64,${base64}`;
+  await img.decode();
+  const scale = Math.min(1, MAX_SIDE / Math.max(img.naturalWidth, img.naturalHeight));
+  if (scale === 1 && base64.length < 3_000_000) return { data: base64, mimeType: "image/png" };
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(img.naturalWidth * scale);
+  canvas.height = Math.round(img.naturalHeight * scale);
+  canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+  return { data: canvas.toDataURL("image/jpeg", 0.9).split(",")[1], mimeType: "image/jpeg" };
+}
 
-  if (lowerMessage.includes('quota') || lowerMessage.includes('rate limit') || lowerMessage.includes('429')) {
-    return new GeminiError(GeminiErrorType.QUOTA_EXCEEDED, 'API quota exceeded');
-  }
-
-  if (lowerMessage.includes('api key') || lowerMessage.includes('401') || lowerMessage.includes('unauthorized')) {
-    return new GeminiError(GeminiErrorType.INVALID_API_KEY, 'Invalid API key');
-  }
-
-  if (lowerMessage.includes('blocked') || lowerMessage.includes('safety') || lowerMessage.includes('filtered')) {
-    return new GeminiError(GeminiErrorType.CONTENT_FILTERED, 'Content was filtered by safety settings');
-  }
-
-  return new GeminiError(GeminiErrorType.UNKNOWN, message);
+// The same photo is sent for analysis, each render, and each review; shrink it once.
+const prepared = new Map<string, Promise<{ data: string; mimeType: string }>>();
+function prepareOnce(base64: string) {
+  if (!prepared.has(base64)) { prepared.clear(); prepared.set(base64, prepare(base64)); }
+  return prepared.get(base64)!;
 }
 
 export async function analyzeProductImage(base64Image: string): Promise<ProductMetadata> {
-  try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-flash-preview',
-      contents: {
-        parts: [
-          { inlineData: { data: base64Image, mimeType: 'image/png' } },
-          { text: ACTIVE_ANALYZE_PROMPT }
-        ]
-      },
-      config: {
-        responseMimeType: "application/json",
-        responseSchema: {
-          type: Type.OBJECT,
-          properties: {
-            strainName: { type: Type.STRING },
-            fruitFlavor: { type: Type.STRING },
-            primaryColor: { type: Type.STRING },
-            secondaryColors: {
-              type: Type.ARRAY,
-              items: { type: Type.STRING }
-            },
-            notes: { type: Type.STRING },
-            strainType: { type: Type.STRING }
-          },
-          required: ["strainName", "fruitFlavor", "primaryColor", "secondaryColors", "notes"]
-        }
-      }
-    });
-
-    const data = JSON.parse(response.text || "{}") as ProductMetadata;
-    // Normalize strainType to lowercase and validate
-    if (data.strainType) {
-      const normalized = data.strainType.toLowerCase();
-      data.strainType = ['sativa', 'hybrid', 'indica'].includes(normalized)
-        ? (normalized as 'sativa' | 'hybrid' | 'indica')
-        : undefined;
-    }
-    return data;
-  } catch (error) {
-    throw categorizeError(error);
-  }
+  const { meta } = await post<{ meta: ProductMetadata }>("analyze", { image: await prepareOnce(base64Image) });
+  return meta;
 }
 
 export async function generateAdImage(
@@ -95,38 +88,22 @@ export async function generateAdImage(
   metadata: ProductMetadata,
   settings: GenerationSettings
 ): Promise<string> {
-  try {
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-    const finalPrompt = ACTIVE_GENERATE_PROMPT(metadata, settings);
+  const { image } = await post<{ image: string }>("generate", { image: await prepareOnce(base64SourceImage), meta: metadata, settings });
+  return image;
+}
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-3-pro-image-preview',
-      contents: {
-        parts: [
-          { inlineData: { data: base64SourceImage, mimeType: 'image/png' } },
-          { text: finalPrompt }
-        ]
-      },
-      config: {
-        imageConfig: {
-          aspectRatio: settings.aspectRatio,
-          imageSize: settings.imageSize
-        }
-      }
-    });
-
-    const parts = response.candidates?.[0]?.content?.parts || [];
-    const imagePart = parts.find((part) => part.inlineData);
-
-    if (!imagePart?.inlineData) {
-      throw new GeminiError(GeminiErrorType.NO_IMAGE_DATA, 'No image data returned from model');
-    }
-
-    return `data:image/png;base64,${imagePart.inlineData.data}`;
-  } catch (error) {
-    if (error instanceof GeminiError) {
-      throw error;
-    }
-    throw categorizeError(error);
-  }
+export async function reviewAdImage(
+  candidateDataUrl: string,
+  base64SourceImage: string,
+  metadata: ProductMetadata,
+  settings: GenerationSettings
+): Promise<ReviewResult> {
+  const [, mimeType = "image/png", data = ""] = candidateDataUrl.match(/^data:([^;]+);base64,(.*)$/) ?? [];
+  const { review } = await post<{ review: ReviewResult }>("review", {
+    candidate: { data, mimeType },
+    source: await prepareOnce(base64SourceImage),
+    meta: metadata,
+    settings,
+  });
+  return review;
 }

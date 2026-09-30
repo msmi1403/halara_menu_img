@@ -1,0 +1,42 @@
+{
+  "standard": [
+    {
+      "file": "standard-1.jpg",
+      "from": "high-thc/apple-fritter/cart.png"
+    },
+    {
+      "file": "standard-2.jpg",
+      "from": "high-thc/lychee-goji-berry-tea/cart.png"
+    }
+  ],
+  "ny": [
+    {
+      "file": "ny-1.jpg",
+      "from": "high-thc/NY/apricot-octane/aio.png"
+    },
+    {
+      "file": "ny-2.jpg",
+      "from": "high-thc/NY/maui-wowie/aio.png"
+    }
+  ],
+  "resin": [
+    {
+      "file": "resin-1.jpg",
+      "from": "resin-sauce/banana-mochi-funk/cart.png"
+    },
+    {
+      "file": "resin-2.jpg",
+      "from": "resin-sauce/lilac-trainwreck/cart.png"
+    }
+  ],
+  "cbd": [
+    {
+      "file": "cbd-1.jpg",
+      "from": "high-cbd/couch-cruiser/aio.png"
+    },
+    {
+      "file": "cbd-2.jpg",
+      "from": "high-cbd/day-tripper/aio.png"
+    }
+  ]
+}
