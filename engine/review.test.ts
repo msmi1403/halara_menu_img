@@ -31,6 +31,7 @@ test("strain names compare loosely on spacing and case only", () => {
 test("expectations follow the prompt's mode precedence and badge rules", () => {
   assert.equal(expectationFor(meta, base).badge, "90%+ TAC");
   assert.equal(expectationFor(meta, { ...base, resinRosinMode: true }).badge, "80%+ TAC");
+  assert.equal(expectationFor(meta, { ...base, resinRosinMode: true, rosinMode: true }).badge, "75%+ TAC");
   assert.match(expectationFor(meta, { ...base, resinRosinMode: true }).outlineColor, /dark red/);
   assert.equal(expectationFor(meta, { ...base, cbdMode: true, cbdRatio: "2:1" }).badge, "2:1 CBD");
   assert.equal(expectationFor(meta, { ...base, batteryMode: true, cbdMode: true }).badge, null);

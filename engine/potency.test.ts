@@ -37,6 +37,12 @@ test("blocks a badge that claims more than the box", () => {
   assert.equal(preflight(meta("THC 77% CBG 4% Terps 7.1%"), { ...base, resinRosinMode: true }).problem, null);
 });
 
+test("rosin badges 75%+, so a 70% rosin box passes where resin's 80%+ would not", () => {
+  const rosin = { ...base, resinRosinMode: true, rosinMode: true };
+  assert.equal(preflight(meta("THC 70%"), rosin).problem, null);
+  assert.match(preflight(meta("THC 66%"), rosin).problem!, /75%\+/);
+});
+
 test("takes the CBD ratio from the box; batteries skip the badge entirely", () => {
   const r = preflight(meta("CBD 3:1"), { ...base, cbdMode: true, cbdRatio: "1:1" });
   assert.equal(r.settings.cbdRatio, "3:1");

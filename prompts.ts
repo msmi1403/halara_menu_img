@@ -74,7 +74,8 @@ export const getBadgeContent = (settings?: GenerationSettings): { percent: strin
     const ratio = settings.cbdRatio || '1:1';
     return { percent: ratio, label: 'CBD' };
   }
-  const percent = settings?.resinRosinMode ? '80%+' : '90%+';
+  let percent = '90%+';
+  if (settings?.resinRosinMode) percent = settings.rosinMode ? '75%+' : '80%+';
   return { percent, label: 'TAC' };
 };
 

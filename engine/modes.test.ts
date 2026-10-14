@@ -1,6 +1,12 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
-import { isResinProduct } from "./modes.js";
+import { isResinProduct, isRosinProduct } from "./modes.js";
+
+test("rosin vs resin: only solventless/rosin gets the rosin badge", () => {
+  assert.ok(isRosinProduct("Gas Nana", "live rosin"));
+  assert.ok(isRosinProduct("Sour Diesel Runtz", "solventless All-In-One"));
+  assert.ok(!isRosinProduct("Blueberry Muffin", "live resin sauce cart"));
+});
 
 test("solventless counts as the resin/rosin line even when the box word 'rosin' isn't read", () => {
   // Sep 30 2026: the analyzer read a "1G Rosin" pouch as "solventless All-In-One",

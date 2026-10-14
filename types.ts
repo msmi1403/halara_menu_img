@@ -19,6 +19,8 @@ export interface GenerationSettings {
   additionalInstructions: string;
   nyMode: boolean;
   resinRosinMode: boolean;
+  // Solventless rosin inside resinRosinMode: badge reads 75%+ instead of resin's 80%+.
+  rosinMode?: boolean;
   cbdMode: boolean;
   cbdRatio?: string;
   batteryMode: boolean;

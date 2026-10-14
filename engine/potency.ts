@@ -6,6 +6,7 @@ import { getBadgeContent } from "../prompts.js";
 
 // Potency claims carry a 10% tolerance on the tested value (Malcolm, Sep 29 2026), so
 // resin's standing "80%+ TAC" badge is legal on a 78% box. Resin is ALWAYS 80%+.
+// Solventless rosin is 75%+ from Oct 14 2026 (rosinMode; see engine/modes.ts).
 export const POTENCY_TOLERANCE = 0.1;
 
 const CANNABINOIDS = ["THC", "THCA", "THCV", "CBD", "CBG", "CBN", "CBC"];

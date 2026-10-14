@@ -18,7 +18,7 @@ import {
   importData,
   StorageEstimate
 } from './dbService';
-import { isResinProduct, isCbdProduct, isBatteryProduct } from './engine/modes';
+import { isResinProduct, isRosinProduct, isCbdProduct, isBatteryProduct } from './engine/modes';
 
 // Image input validation constants
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
@@ -253,6 +253,7 @@ const App: React.FC = () => {
       setSettings(prev => ({
         ...prev,
         resinRosinMode: isResinProduct(data.strainName, `${data.notes} ${data.productLine ?? ''}`),
+        rosinMode: isRosinProduct(data.strainName, `${data.notes} ${data.productLine ?? ''}`),
         cbdMode: isCbdProduct(data.strainName, `${data.notes} ${data.productLine ?? ''}`),
         batteryMode: isBatteryProduct(data.strainName, `${data.notes} ${data.productLine ?? ''}`)
       }));

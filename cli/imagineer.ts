@@ -18,7 +18,7 @@ import { homedir } from "os";
 import { GoogleGenAI } from "@google/genai";
 import { ProductMetadata, GenerationSettings } from "../types";
 import { analyzeProductImage, generateAdImage } from "../engine/gemini";
-import { isResinProduct, isCbdProduct, isBatteryProduct } from "../engine/modes";
+import { isResinProduct, isRosinProduct, isCbdProduct, isBatteryProduct } from "../engine/modes";
 import { preflight, boxRatio } from "../engine/potency";
 import jpeg from "jpeg-js";
 import {
@@ -204,6 +204,7 @@ function settingsFor(meta: ProductMetadata, flags: Record<string, string>): Gene
   // must not flip into CBD mode (that would also skip the potency preflight).
   const printed = `${meta.notes} ${meta.productLine ?? ""}`;
   s.resinRosinMode = isResinProduct(meta.strainName, printed);
+  s.rosinMode = isRosinProduct(meta.strainName, printed);
   s.cbdMode = isCbdProduct(meta.strainName, printed) || boxRatio(meta.boxPotency) !== null;
   s.batteryMode = isBatteryProduct(meta.strainName, printed);
   const state = (flags.state || "CA").toUpperCase();
@@ -330,6 +331,7 @@ async function cmdCalibrate(ai: GoogleGenAI, flags: Record<string, string>) {
         const settings = baseSettings();
         settings.nyMode = mode === "ny";
         settings.resinRosinMode = mode === "resin";
+        // rosinMode stays off: approved rosin images made before Oct 14 2026 carry 80%+.
         settings.cbdMode = mode === "cbd";
         const meta: ProductMetadata = {
           // Site names carry an " RS" suffix (resin sauce) that the artwork never shows.
