@@ -5,7 +5,7 @@
 // Box source = front panel + lid strip cut from the KSD dieline (see menu-images skill).
 // Usage: npx tsx cli/state-version.mts <approved site image> <new box image> <outDir> "<box text to keep exact>" [aio]
 // Pass "aio" for an All-In-One: the package is the stand-up pouch, not a carton.
-// Writes s{1..3}.png (swap) and v{1..3}.png (final). Review the v files by eye.
+// Writes s{N}.png (swap) and v{N}.png (final), one per variant (VARIANTS env, default 1). Review the v files by eye.
 import { GoogleGenAI } from "@google/genai";
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 const key = process.env.GEMINI_API_KEY || readFileSync(process.env.HOME + "/Developer/HalaraMarketing/website/halara-web/.env.local","utf8").match(/^GEMINI_API_KEY=(.*)$/m)![1].replace(/^"|"$/g,"");
@@ -30,7 +30,9 @@ async function edit(img: string | Buffer, prompt: string): Promise<Buffer> {
   if (!data) throw new Error("no image");
   return Buffer.from(data, "base64");
 }
-await Promise.all([1,2,3].map(async i => {
+// Each variant is a paid image call (~13¢). Default 1; set VARIANTS=3 only when Malcolm OKs the spend.
+const variants = Array.from({ length: Number(process.env.VARIANTS ?? 1) }, (_, k) => k + 1);
+await Promise.all(variants.map(async i => {
   try {
     // Resumable: rerun the same command after network errors and finished steps are kept.
     if (existsSync(`${outDir}/v${i}.png`)) { console.log(`v${i}: already done`); return; }

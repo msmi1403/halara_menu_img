@@ -10,7 +10,9 @@ const [src, outDir, prompt, ref] = process.argv.slice(2);
 mkdirSync(outDir, { recursive: true });
 const part = (p: string) => ({ inlineData: { data: readFileSync(p).toString("base64"), mimeType: readFileSync(p)[0] === 0x89 ? "image/png" : "image/jpeg" } });
 const parts = [{ text: "IMAGE 1:" }, part(src), ...(ref ? [{ text: "IMAGE 2 (style reference only):" }, part(ref)] : []), { text: prompt }];
-await Promise.all([1,2,3].map(async i => {
+// Each variant is a paid image call (~13¢). Default 1; set VARIANTS=3 only when Malcolm OKs the spend.
+const variants = Array.from({ length: Number(process.env.VARIANTS ?? 1) }, (_, k) => k + 1);
+await Promise.all(variants.map(async i => {
   try {
     const r = await ai.models.generateContent({ model: "gemini-3-pro-image-preview", contents: { parts }, config: { imageConfig: { aspectRatio: "1:1", imageSize: process.env.IMG_SIZE ?? "1K" } } });
     const img = r.candidates?.[0]?.content?.parts?.find(p => p.inlineData);
