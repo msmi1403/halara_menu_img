@@ -345,6 +345,14 @@
     {
       "file": "solventless/tropicana-gelato/aio.jpg",
       "mode": "resin"
+    },
+    {
+      "file": "high-thc/MN/blue-dream/cart.jpg",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/MN/watermelon-z-og/cart.jpg",
+      "mode": "standard"
     }
   ]
 }
