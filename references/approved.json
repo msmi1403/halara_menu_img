@@ -353,6 +353,26 @@
     {
       "file": "high-thc/MN/watermelon-z-og/cart.jpg",
       "mode": "standard"
+    },
+    {
+      "file": "resin-sauce/cereal-milk/aio.jpg",
+      "mode": "resin"
+    },
+    {
+      "file": "resin-sauce/cereal-milk/cart.jpg",
+      "mode": "resin"
+    },
+    {
+      "file": "high-thc/WA/strawberry-sugar/aio.jpg",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/WA/pink-lemonade-haze/aio.jpg",
+      "mode": "standard"
+    },
+    {
+      "file": "high-thc/WA/northern-lights/aio.jpg",
+      "mode": "standard"
     }
   ]
 }
